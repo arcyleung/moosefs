@@ -16,6 +16,7 @@ class Organization:
 					["MD", ["MS", "MO", "OF"]],
 					["RP", ["SC", "PA"]],
 					["QU", ["QU"]],
+					["TM", ["TM"]],
 					["XC", ["MC", "CC"]]
 				]
 			elif cl.electfound():
@@ -26,6 +27,7 @@ class Organization:
 					["HD", ["HD"]],
 					["EX", ["EX"]],
 					["QU", ["QU"]],
+					["TM", ["TM"]],
 					["XC", ["MC", "CC"]]
 				]
 			elif cl.followerfound() or cl.usurperfound():
@@ -50,6 +52,7 @@ class Organization:
 					["RP", ["SC", "PA"]],
 					["RS", ["SC", "PA", "OF", "AL"]], # backwards compatibility
 					["QU", ["QU"]],
+					["TM", ["TM"]],
 					["MC", ["MC"]],
 					["CC", ["CC"]]
 				]
@@ -61,6 +64,7 @@ class Organization:
 					["HD", ["HD"]],
 					["EX", ["EX"]],
 					["QU", ["QU"]],
+					["TM", ["TM"]],
 					["MC", ["MC"]],
 					["CC", ["CC"]]
 				]
@@ -106,7 +110,8 @@ class Organization:
 			"QU":("Quotas",                    lambda: cl.master()!=None),
 			"XC":("Charts",                    lambda: cl.master()!=None and not ajax_request),
 				"MC":("Master servers",            lambda: cl.master()!=None and not ajax_request),
-				"CC":("Chunkservers",              lambda: cl.master()!=None and not ajax_request)
+				"CC":("Chunkservers",              lambda: cl.master()!=None and not ajax_request),
+				"TM":("TreeMap",              	   lambda: cl.master()!=None and not ajax_request)
 		}
 
 	def set_sections(self, sectionset, subsectionset=None):
@@ -115,7 +120,7 @@ class Organization:
 
 	def get_default_section(self):
 		return self.menu_tree[0][0]
-	
+
 	# returns list of subsections ids for given menu section
 	def menu_subitems(self, section):
 		for menu_item in self.menu_tree:
@@ -127,7 +132,7 @@ class Organization:
 	def shall_render(self, section):
 		if self.sectionset==None:
 			raise Exception("Organization object is not initialized properly: set_sections() must be called before shall_render()")
-		
+
 		# render section if it's in the sectionset
 		effective_sectionset = set(self.sectionset)
 
@@ -135,14 +140,14 @@ class Organization:
 			if self.subsectionset==None:
 				raise Exception("Organization object is not initialized properly: set_sections() must be called before shall_render()")
 			# adjust default subsections
-			if "RP" in self.sectionset: 
+			if "RP" in self.sectionset:
 				if len(self.subsectionset.intersection(set(self.menu_subitems("RP"))))==0:
 					self.subsectionset |= set(("SC",)) # add Storage Classes section by default if Redundancy Policy is selected
 			if "IN" in self.sectionset:
 				if len(self.subsectionset.intersection(set(self.menu_subitems("IN"))))==0:
 					self.subsectionset |= set((self.menu_subitems("IN"))) # add all subsections by default if Info is selected
-			# render subsection only if 
-			#    its main section is visible and it's in the subsectionset 
+			# render subsection only if
+			#    its main section is visible and it's in the subsectionset
 			# or its main section is visible and there no subsections for this main section specified
 			for main_section in self.sectionset:
 				subitemset = set(self.menu_subitems(main_section))

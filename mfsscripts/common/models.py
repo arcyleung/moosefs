@@ -37,7 +37,7 @@ class MasterServer:
 		self.chlogtime = chlogtime
 		self.secdelta = None  #updated separately by update_masterservers_delays
 		self.metadelay = None #updated separately by update_masterservers_delays
-		
+
 		if self.workingstate==STATE_FOLLOWER:
 			if sync==0:	self.statestr += " (DESYNC)"
 			if sync==2:	self.statestr += " (DELAYED)"
@@ -64,7 +64,7 @@ class MasterServer:
 # 		if self.version>=(4,53,0):
 # 			self.featuremask |= (1<<FEATURE_LABELMODE_OVERRIDES)
 # 		if self.version>=(4,57,0):
-# 			self.featuremask |= (1<<FEATURE_SCLASSGROUPS)	
+# 			self.featuremask |= (1<<FEATURE_SCLASSGROUPS)
 
 # 	def version_at_least(self,v1,v2,v3):
 # 		return (self.version>=(v1,v2,v3))
@@ -78,7 +78,7 @@ class MasterServer:
 # 		return self.pro
 # 	def has_feature(self,featureid):
 # 		return True if (self.featuremask & (1<<featureid)) else False
-	
+
 
 
 class Metalogger:
@@ -206,13 +206,13 @@ class Licence:
 
 	def is_time_unlimited(self):
 		return self.licleft==0xFFFFFFFF or self.licmaxtime==0xFFFFFFFF or self.licver == LICVER_CE
-	
+
 	def is_cs_size_unlimited(self):
 		return self.csmaxsize==0xFFFFFFFFFFFFFFFF or self.licver == LICVER_CE
-	
+
 	def is_cs_cnt_unlimited(self):
 		return self.csmaxcnt==0xFFFF or self.licver == LICVER_CE
-	
+
 	def is_size_unlimited(self):
 		return self.licmaxsize==0xFFFFFFFFFFFFFFFF or (self.licmaxsize==0 and self.currentsize==0) or self.licver == LICVER_CE
 
@@ -339,7 +339,7 @@ class ChunkServer:
 			for bit,char in enumerate(map(chr,range(ord('A'),ord('Z')+1))):
 				if self.labels & (1<<bit):
 					labelstab.append(char)
-			self.labelstr = ",".join(labelstab)		
+			self.labelstr = ",".join(labelstab)
 
 	def is_maintenance_off(self):
 		return (self.flags&6)==0
@@ -362,7 +362,7 @@ class ChunkServer:
 				return 'not ready for removal (unrecognized status)'
 		else:
 			return ''
-		
+
 # Chunkserver's hard disk drive
 class HDD:
 	def __init__(self,csvalid,hostkey,hoststr,hostip,port,hddpath,sortippath,ippath,hostpath,flags,clearerrorarg,errchunkid,errtime,used,total,chunkscnt,rbw,wbw,usecreadavg,usecwriteavg,usecfsyncavg,usecreadmax,usecwritemax,usecfsyncmax,rops,wops,fsyncops,rbytes,wbytes,mfrstatus):
@@ -399,12 +399,12 @@ class HDD:
 
 	def __lt__(self, other):
 		return self.sortippath < other.sortippath
-	
+
 	def is_valid(self):
 		return self.csvalid==CS_HDD_CS_VALID
 	def has_errors(self):
 		return self.errtime!=0 or self.errchunkid!=0
-	
+
 	def get_statuslist(self):
 		statuslist = []
 		if (self.csvalid == CS_HDD_CS_TOO_OLD):
@@ -539,7 +539,7 @@ class Session:
 			return "TMP/%u" % (self.sessionid&0x7FFFFFFF)
 		else:
 			return "%u" % (self.sessionid)
-		
+
 	def is_tmp(self):
 		return self.sessionid & 0x80000000
 
@@ -616,7 +616,7 @@ class StorageClass:
 
 		self.defined_create = False
 		self.defined_archive = False
-		self.defined_trash = False	
+		self.defined_trash = False
 		for state in self.states:
 			if state.name=="CREATE":
 				self.defined_create = state.defined
@@ -699,7 +699,7 @@ class ChunkTestInfo72:
 		self.rebalance = rebalance
 		self.labels_dont_match = labels_dont_match
 		self.locked_unused = locked_unused
-		self.locked_used = locked_used		
+		self.locked_used = locked_used
 
 class ChunkTestInfo96:
 	def __init__(self,loopstart,loopend,fixed,forcekeep,delete_invalid,delete_no_longer_needed,delete_wrong_version,delete_duplicated_ecpart,delete_excess_ecpart,delete_excess_copy,delete_diskclean_ecpart,delete_diskclean_copy,replicate_dupserver_ecpart,replicate_needed_ecpart,replicate_needed_copy,replicate_wronglabels_ecpart,replicate_wronglabels_copy,split_copy_into_ecparts,join_ecparts_into_copy,recover_ecpart,calculate_ecchksum,locked_unused,locked_used,replicate_rebalance):
@@ -727,7 +727,7 @@ class ChunkTestInfo96:
 		self.locked_unused = locked_unused
 		self.locked_used = locked_used
 		self.replicate_rebalance = replicate_rebalance
-	
+
 class OpenFile:
 	def __init__(self,sessionid,host,sortipnum,ipnum,info,inode,paths):
 		self.sessionid = sessionid
@@ -776,3 +776,160 @@ class Quota:
 		self.clength = clength
 		self.csize = csize
 		self.crealsize = crealsize
+
+# Treemap visualization models
+class FilesystemNode:
+	"""Represents a node in the filesystem hierarchy for treemap visualization."""
+	def __init__(self, name, path, inode, size, node_type, mtime=0, ctime=0, depth=0):
+		self.name = name
+		self.path = path
+		self.inode = inode
+		self.size = size
+		self.type = node_type  # 'file' or 'directory'
+		self.mtime = mtime
+		self.ctime = ctime
+		self.depth = depth
+		self.children = []
+		self.file_count = 0
+		self.dir_count = 0
+		self.error = None
+
+	def is_directory(self):
+		return self.type == 'directory'
+
+	def is_file(self):
+		return self.type == 'file'
+
+	def add_child(self, child):
+		self.children.append(child)
+		if child.is_file():
+			self.file_count += 1
+		else:
+			self.file_count += child.file_count
+			self.dir_count += child.dir_count + 1
+
+	def get_total_size(self):
+		total = self.size
+		for child in self.children:
+			total += child.get_total_size()
+		return total
+
+	def get_extension(self):
+		if self.is_file() and '.' in self.name:
+			return self.name.split('.')[-1].lower()
+		return None
+
+class TreemapNode:
+	"""Represents a node formatted for treemap visualization."""
+	def __init__(self, name, value, path, node_type, color='#607D8B'):
+		self.name = name
+		self.value = value
+		self.path = path
+		self.type = node_type
+		self.color = color
+		self.children = []
+
+	def add_child(self, child):
+		self.children.append(child)
+
+	def to_dict(self):
+		"""Convert to dictionary for JSON serialization."""
+		result = {
+			'name': self.name,
+			'value': self.value,
+			'path': self.path,
+			'type': self.type,
+			'color': self.color
+		}
+		if self.children:
+			result['children'] = [child.to_dict() for child in self.children]
+		return result
+
+class TreemapConfig:
+	"""Configuration for treemap visualization."""
+	def __init__(self, path='/', depth=3, color_by='type', include_files=True):
+		self.path = path
+		self.depth = depth
+		self.color_by = color_by  # 'type', 'age', 'size'
+		self.include_files = include_files
+
+	def validate(self):
+		"""Validate configuration parameters."""
+		if self.depth < 1 or self.depth > 10:
+			raise ValueError("Depth must be between 1 and 10")
+		if self.color_by not in ['type', 'age', 'size']:
+			raise ValueError("Color scheme must be 'type', 'age', or 'size'")
+		if not self.path or not isinstance(self.path, str):
+			raise ValueError("Path must be a non-empty string")
+		return True
+
+class FileStatistics:
+	"""Detailed statistics for a file or directory."""
+	def __init__(self, path, inode, size, mode, mtime, ctime, atime=0, uid=0, gid=0):
+		self.path = path
+		self.inode = inode
+		self.size = size
+		self.mode = mode
+		self.mtime = mtime
+		self.ctime = ctime
+		self.atime = atime
+		self.uid = uid
+		self.gid = gid
+		self.error = None
+
+	def is_directory(self):
+		return self.mode & 0x4000 != 0
+
+	def is_file(self):
+		return self.mode & 0x8000 != 0
+
+	def get_permissions(self):
+		"""Get human-readable permissions."""
+		if self.is_directory():
+			perms = 'd'
+		else:
+			perms = '-'
+
+		# Owner permissions
+		perms += 'r' if self.mode & 0o400 else '-'
+		perms += 'w' if self.mode & 0o200 else '-'
+		perms += 'x' if self.mode & 0o100 else '-'
+
+		# Group permissions
+		perms += 'r' if self.mode & 0o040 else '-'
+		perms += 'w' if self.mode & 0o020 else '-'
+		perms += 'x' if self.mode & 0o010 else '-'
+
+		# Other permissions
+		perms += 'r' if self.mode & 0o004 else '-'
+		perms += 'w' if self.mode & 0o002 else '-'
+		perms += 'x' if self.mode & 0o001 else '-'
+
+		return perms
+
+	def get_size_human(self):
+		"""Get human-readable size."""
+		for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+			if self.size < 1024.0:
+				return f"{self.size:.1f} {unit}"
+			self.size /= 1024.0
+		return f"{self.size:.1f} PB"
+
+	def to_dict(self):
+		"""Convert to dictionary for JSON serialization."""
+		return {
+			'path': self.path,
+			'inode': self.inode,
+			'size': self.size,
+			'size_human': self.get_size_human(),
+			'mode': self.mode,
+			'permissions': self.get_permissions(),
+			'mtime': self.mtime,
+			'ctime': self.ctime,
+			'atime': self.atime,
+			'uid': self.uid,
+			'gid': self.gid,
+			'is_directory': self.is_directory(),
+			'is_file': self.is_file(),
+			'error': self.error
+		}

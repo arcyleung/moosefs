@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
-# 
+#
 # This file is part of MooseFS.
-# 
+#
 # MooseFS is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, version 2 (only).
-# 
+#
 # MooseFS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with MooseFS; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
@@ -65,7 +65,7 @@ else:
 	sys.stdout.reconfigure(encoding='utf-8')
 
 fields = MFSFieldStorage()
-fields.initFromURL()		
+fields.initFromURL()
 
 if fields.getstr("ajax")=="container":
 	ajax_request = AJAX_CONTAINER
@@ -112,8 +112,8 @@ if errmsg:
 	print("""<title>MooseFS GUI %s</title>""" % (htmlentities(mastername)))
 	# leave this script a the begining to prevent screen blinking when using dark mode
 	print("""<script type="text/javascript"><!--//--><![CDATA[//><!--
-		if (localStorage.getItem('theme')===null || localStorage.getItem('theme')==='dark') { document.documentElement.setAttribute('data-theme', 'dark');}	
-		//--><!]]></script>""")		
+		if (localStorage.getItem('theme')===null || localStorage.getItem('theme')==='dark') { document.documentElement.setAttribute('data-theme', 'dark');}
+		//--><!]]></script>""")
 	print("""<link rel="stylesheet" href="assets/mfs.css" type="text/css" />""")
 	print("""</head>""")
 	print("""<body>""")
@@ -163,7 +163,7 @@ org.set_sections(sectionset,subsectionset)
 #######################################################
 
 # Print Prometheus metrics and exit
-if ajax_request == AJAX_METRICS: 
+if ajax_request == AJAX_METRICS:
 	import views.metrics as metrics
 	metrics.print_render(fields, masterhost, masterport)
 	exit(0)
@@ -194,7 +194,7 @@ if org.shall_render("ST"):
 		import views.graph
 		print_out(views.graph.render(dataprovider, fields, vld))
 	except Exception:
-		print_exception()	
+		print_exception()
 
 # Info section
 
@@ -209,7 +209,7 @@ if org.shall_render("IG"):
 
 #Metadata servers subsection
 if org.shall_render("IM"):
-	try:		
+	try:
 		# update master servers delay times prior to getting the list of master servers
 		highest_saved_metaversion, highest_metaversion_checksum = cl.update_masterservers_delays()
 		import views.metaservers
@@ -221,7 +221,7 @@ if org.shall_render("IM"):
 # Chunks matrix
 if org.shall_render("IC"):
 	try:
-		import views.matrix 
+		import views.matrix
 		print_out(views.matrix.render(dataprovider, fields, vld, selectable))
 	except Exception:
 		print_exception()
@@ -255,7 +255,7 @@ if org.shall_render("MU"):
 # Chunkservers section
 if org.shall_render("CS"):
 	try:
-		import views.chunkservers 
+		import views.chunkservers
 		print_out(views.chunkservers.render(dataprovider, fields, vld, readonly, selectable))
 	except Exception:
 		print_exception()
@@ -307,7 +307,7 @@ if org.shall_render("OF"):
 
 if org.shall_render("RP"):
 	html_menu_subsections(org, fields, "RP")
-	
+
 # Storage classes section
 if org.shall_render("SC"):
 	try:
@@ -329,6 +329,15 @@ if org.shall_render("QU"):
 	try:
 		import views.quotas
 		print_out(views.quotas.render(dataprovider, fields, vld))
+	except Exception:
+		print_exception()
+
+# Treemap
+if org.shall_render("TM"):
+	try:
+		print("""<script src="assets/treemap.js" type="text/javascript"></script>""")
+		import views.files_treemap
+		print_out(views.files_treemap.render(dataprovider, fields, vld))
 	except Exception:
 		print_exception()
 

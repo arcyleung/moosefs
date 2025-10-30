@@ -1,4 +1,4 @@
-/* Default initial knobs positions 
+/* Default initial knobs positions
    it's not required but reduces flickering */
 :root {
 	--matrixar_vis-knob-rotation:    -45deg;
@@ -26,27 +26,27 @@
 	--pink:        #9700FF;
 
 	--c050: #010F03; /*Darkest*/
-	--c100: #031705; 
-	--c200: #052109; 
-	--c300: #2a322c; 
-	--c400: #88A891; 
+	--c100: #031705;
+	--c200: #052109;
+	--c300: #2a322c;
+	--c400: #88A891;
 	--c500: #A8BAAD;
-	--c600: #d7ddda; 
+	--c600: #d7ddda;
 	--c650: #dfe5e2;
-	--c700: #D3DED8; 
-	--c800: #E8EDEB; 
-	--c900: #F5F7F6; 
+	--c700: #D3DED8;
+	--c800: #E8EDEB;
+	--c900: #F5F7F6;
 	--c950: #FCFCFC; /*Lightest*/
 
 	/*Percentage bar gauge colors*/
 	--prog-left-clr:   #acdcb7;
 	--prog-middle-clr: #52c89b;
-	--prog-right-clr:  #00498f; 
+	--prog-right-clr:  #00498f;
 	--prog-avg:        #00498f;
 }
 
 /* Dark color set */
-[data-theme="dark"] { 
+[data-theme="dark"] {
 	--green: 	     #129f32;
 	--red: 		     #dd1f00;
 	--yellow_dark: #d69f00;
@@ -100,7 +100,7 @@
 	--u-brd-btm-clr: var(--s-brd-clr);           /*Unselected bottom border*/
 	--s-brd-btm-clr: var(--s-bckgnd-clr);        /*Selected bottom border*/
 	--ss-brd-clr: var(--c600);                   /*Divider between 2 selected tabs*/
-	
+
 	/*Data table colors (light color set)*/
 	--tab-title-text-clr: var(--c200);              /*Table title panel text color*/
 	--tab-title-bckgnd-clr: var(--c600);            /*Table title panel (tab) background*/
@@ -213,11 +213,11 @@ body {
 /* * html body {padding: 56px 0 24px 0;} for internet explorer */
 
 #container {
-	position: fixed; 
+	position: fixed;
 	top: var(--container-top);
 	bottom: 24px;
 	left: 0;
-	right: 0; 
+	right: 0;
 	overflow: auto;
 	background: var(--container-bckgnd-clr);
 	padding:0px 6px 2px 6px;
@@ -228,11 +228,11 @@ body {
 }
 
 #header {
-	position: absolute; 
+	position: absolute;
 	top: 0;
-	left: 0; 
-	width: 100%; 
-	height: var(--header-height); 
+	left: 0;
+	width: 100%;
+	height: var(--header-height);
 	overflow: hidden;
 	z-index: 1;
 	background: var(--header-bckgnd-clr);
@@ -242,10 +242,10 @@ body {
 
 #footer {
 	position: absolute;
-	bottom: 0; 
+	bottom: 0;
 	left: 0;
 	width: 100%;
-	max-height: 19px; 
+	max-height: 19px;
 	overflow: hidden;
 	font-size: 13px;
 	border-top: 2px solid var(--container-bckgnd-clr);
@@ -363,7 +363,7 @@ span.OVERGOALBOX {background: var(--blue);          width: 16px; height: 8px; di
 span.NORMALBOX {background: var(--green);           width: 16px; height: 8px; display: inline-block;}
 span.UNDERGOALBOX {background: var(--yellow_dark);  width: 16px; height: 8px; display: inline-block;}
 span.ENDANGEREDBOX {background: var(--orange);      width: 16px; height: 8px; display: inline-block;}
-span.MISSINGBOX {background: var(--error-clr);      width: 16px; height: 8px; display: inline-block;} 
+span.MISSINGBOX {background: var(--error-clr);      width: 16px; height: 8px; display: inline-block;}
 
 span.SUCCESS {color: var(--ok-clr);}
 span.PARTIAL {color: var(--turquoise);}
@@ -398,24 +398,24 @@ span.chartcaptionjs {position: relative; top: 4px; left: -1px ; height: 20px; bo
 
 table {border: 1px solid var(--tbl-brd-clr-th); border-spacing: 0; border-collapse: collapse;line-height: normal;}
 th {
-	white-space: nowrap; 
-	border-right: 1px solid var(--tbl-brd-clr-th); 
-	border-bottom: 1px solid var(--tbl-brd-clr-th); 
-	border-spacing: 0; 
-	border-collapse: 
-	collapse; font-size: 12px; 
+	white-space: nowrap;
+	border-right: 1px solid var(--tbl-brd-clr-th);
+	border-bottom: 1px solid var(--tbl-brd-clr-th);
+	border-spacing: 0;
+	border-collapse:
+	collapse; font-size: 12px;
 	vertical-align: bottom;
 }
 th[rowspan], td[rowspan] {vertical-align: middle;}
 tr {height: 19px;}
 td {
-	white-space: nowrap; 
-	border-right: 1px solid var(--tbl-brd-clr); 
-	border-bottom: 1px solid var(--tbl-brd-clr); 
-	border-spacing: 0; 
-	border-collapse: collapse; 
-	font-size: 12px; 
-	padding: 2px 3px; 
+	white-space: nowrap;
+	border-right: 1px solid var(--tbl-brd-clr);
+	border-bottom: 1px solid var(--tbl-brd-clr);
+	border-spacing: 0;
+	border-collapse: collapse;
+	font-size: 12px;
+	padding: 2px 3px;
 	vertical-align: bottom;
 }
 td.word-wrap {white-space: normal;overflow-wrap: break-word;}
@@ -455,12 +455,12 @@ table.header-table td.menu-hamburger svg {height: 34px; width: 36px; vertical-al
 	position: absolute;
 	opacity: 0;
 	visibility: hidden;
-	top: var(--header-height); 
+	top: var(--header-height);
 	right: 0;
 	bottom: 24px;
 	width: 100%;
 	background-color: var(--header-bckgnd-clr);
-	font-size: 18px; 
+	font-size: 18px;
 	z-index: 100;
 	border-bottom: 2px solid var(--footer-bckgnd-clr);
 	overflow: scroll;
@@ -485,11 +485,11 @@ table.header-table td.menu-hamburger svg {height: 34px; width: 36px; vertical-al
 .submenu-item.active {cursor:default;  color: var(--hdr-text-clr); border: 1px solid var(--c200);}
 .submenu-item a {text-decoration: none; }
 .submenu-item.active a {color: var(--hdr-text-clr);}
-.submenu-item.md {font-size: 13px; margin:  2px 2px 0 2px; padding: 6px 6px;} 
-.submenu-item.xs {font-size: 13px; margin:  2px 2px 0 2px; padding: 6px 6px;} 
+.submenu-item.md {font-size: 13px; margin:  2px 2px 0 2px; padding: 6px 6px;}
+.submenu-item.xs {font-size: 13px; margin:  2px 2px 0 2px; padding: 6px 6px;}
 
 div.tab_title { /*Data table (acid_tab, FR) title panel*/
-	display: block; 
+	display: block;
 	font-size: 15px;
 	font-weight: bold;
 	text-align: left;
@@ -510,7 +510,7 @@ div.tab_title.no_table {
 .tab_title svg.icon {transform: scale(1.2); margin-left: 2px; margin-bottom: 1px;}
 
 
-table.acid_tab { width: 100%; margin-left: auto; margin-right: auto; margin-bottom: 3px;} 
+table.acid_tab { width: 100%; margin-left: auto; margin-right: auto; margin-bottom: 3px;}
 table.acid_tab th, table.acid_tab tfoot td {background-color: var(--th-bckgnd-clr); color: var(--th-txt-clr); font-size: 13px; height: 15px; padding: 2px 3px;}
 table.acid_tab td {background-color: var(--td-bckgnd-clr);}
 table.acid_tab tr.C1 td {background-color: var(--td-bckgnd-clr);}
@@ -649,7 +649,7 @@ span.CBOX {width: 25px; height: 11px; margin-right: 4px; display: inline-block; 
 .MEMDISTFIRST {border: 0;}
 .MEMDISTMID {border: 0; border-left: 1px black solid;}
 
-th.progbar {width: 140px;} 
+th.progbar {width: 140px;}
 table.narrow th.progbar {width:60px;}
 div.PROGBOX {
 	position: relative;
@@ -674,7 +674,7 @@ div.PROGVALUE {
 	height: 14px;
 	position: absolute;
 	left: 0;
-	bottom: 0; 
+	bottom: 0;
 	text-align: right;
 	font-weight: bold;
 }
@@ -733,12 +733,12 @@ div.PROGAVG {
 }
 .slider-text {
 	font-size: 8px;
-	font-weight: 900; 
+	font-weight: 900;
 	color: var(--footer-bckgnd-clr);
 	text-align: center;
 	left: 15px;
 	position: absolute;
-	transition: .1s; 
+	transition: .1s;
 	width: 10px;
 	line-height: 15px;
 }
@@ -755,7 +755,7 @@ input:checked + .slider .slider-text {transform: translateX(-11.5px);}
 /* Cluster summary graph */
 #mfsgraph {display: grid; margin: 12px 0 0 0; padding: 0; text-align: left;}
 @media (min-width: 992px) {
-	#mfsgraph-tile {border: 1px solid var(--tbl-brd-clr); border-radius: 4px; width: max-content; padding: 14px; margin-top: 8px;} 
+	#mfsgraph-tile {border: 1px solid var(--tbl-brd-clr); border-radius: 4px; width: max-content; padding: 14px; margin-top: 8px;}
 }
 @media (max-width: 991px) {
 	#mfsgraph-tile {width: max-content;}
@@ -816,7 +816,7 @@ svg text {fill: var(--text-clr); stroke: none; font-size:12px; font-family: Aria
 .ip-port-cs {text-anchor:end;}                         /* cs ip port */
 .ip-address-ms {font-weight: bold; text-anchor:start;} /* ms ip address */
 .ip-port-ms {text-anchor:start;}                       /* ms ip port */
-.network-line {fill: none; stroke: var(--c400); stroke-width: .5px;} 
+.network-line {fill: none; stroke: var(--c400); stroke-width: .5px;}
 .arc-gauge-bckgrd {fill: none; stroke-linecap: round; stroke: var(--c500);}
 .arc-gauge-name   {opacity: 0.7; font-size: 11px; text-anchor:middle;}
 .arc-gauge-label  {text-anchor:middle;}
@@ -911,3 +911,380 @@ label + .select-fl {
 	margin-left: 4px;
 }
 /*End of select facelift*/
+
+/* Treemap visualizer styles */
+:root {
+	/* Treemap color scheme - File types */
+	--treemap-color-image: #ff6b6b;
+	--treemap-color-video: #4ecdc4;
+	--treemap-color-audio: #45b7d1;
+	--treemap-color-document: #96ceb4;
+	--treemap-color-archive: #feca57;
+	--treemap-color-code: #ff9ff3;
+	--treemap-color-text: #54a0ff;
+	--treemap-color-spreadsheet: #48dbfb;
+	--treemap-color-presentation: #ff6b9d;
+	--treemap-color-pdf: #c8d6e5;
+	--treemap-color-executable: #ff9f43;
+	--treemap-color-library: #a29bfe;
+	--treemap-color-config: #fd79a8;
+	--treemap-color-temp: #636e72;
+	--treemap-color-system: #2d3436;
+	--treemap-color-other: #b2bec3;
+	--treemap-color-directory: #74b9ff;
+	--treemap-color-unknown: #636e72;
+
+	/* Treemap color scheme - File age (gradient from old to new) */
+	--treemap-age-veryold: #2d3436;
+	--treemap-age-old: #636e72;
+	--treemap-age-medium: #74b9ff;
+	--treemap-age-recent: #a29bfe;
+	--treemap-age-veryrecent: #ff9ff3;
+
+	/* Treemap color scheme - File size (gradient from small to large) */
+	--treemap-size-tiny: #dfe6e9;
+	--treemap-size-small: #b2bec3;
+	--treemap-size-medium: #74b9ff;
+	--treemap-size-large: #a29bfe;
+	--treemap-size-huge: #ff9ff3;
+
+	/* Treemap visualization colors */
+	--treemap-stroke-color: var(--c400);
+	--treemap-stroke-width: 1px;
+	--treemap-text-color: var(--text-clr);
+	--treemap-text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+	--treemap-hover-opacity: 0.8;
+	--treemap-selected-opacity: 0.9;
+	--treemap-background: var(--card-bckgnd-clr);
+	--treemap-border-radius: 2px;
+}
+
+/* Dark theme treemap color adjustments */
+[data-theme="dark"] {
+	--treemap-stroke-color: var(--c500);
+	--treemap-text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+/* Treemap container */
+.treemap-container {
+	background: var(--treemap-background);
+	border: 1px solid var(--tbl-brd-clr);
+	border-radius: 4px;
+	padding: 10px;
+	margin: 10px 0;
+	min-height: 400px;
+	position: relative;
+	overflow: hidden;
+}
+
+.treemap-svg {
+	width: 100%;
+	height: 100%;
+	min-height: 400px;
+	cursor: pointer;
+}
+
+/* Treemap nodes */
+.treemap-node {
+	stroke: var(--treemap-stroke-color);
+	stroke-width: var(--treemap-stroke-width);
+	transition: opacity 0.2s ease;
+	cursor: pointer;
+}
+
+.treemap-node:hover {
+	opacity: var(--treemap-hover-opacity);
+	stroke-width: 2px;
+}
+
+.treemap-node.selected {
+	opacity: var(--treemap-selected-opacity);
+	stroke-width: 3px;
+	stroke: var(--link-text-clr);
+}
+
+.treemap-node.directory {
+	fill: var(--treemap-color-directory);
+}
+
+/* Treemap text labels */
+.treemap-label {
+	fill: var(--treemap-text-color);
+	font-family: Arial, Verdana, sans-serif;
+	font-size: 12px;
+	text-anchor: middle;
+	dominant-baseline: middle;
+	pointer-events: none;
+	text-shadow: var(--treemap-text-shadow);
+}
+
+.treemap-label.small {
+	font-size: 10px;
+}
+
+.treemap-label.tiny {
+	font-size: 8px;
+	display: none;
+}
+
+/* Treemap controls */
+.treemap-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	margin-bottom: 15px;
+	padding: 10px;
+	background: var(--card-bckgnd-clr);
+	border: 1px solid var(--tbl-brd-clr);
+	border-radius: 4px;
+	align-items: center;
+}
+
+.treemap-control-group {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.treemap-control-group label {
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+.treemap-path-input {
+	flex: 1;
+	min-width: 200px;
+	padding: 4px 8px;
+	border: 1px solid var(--tbl-brd-clr);
+	border-radius: 2px;
+	background: var(--td-bckgnd-clr);
+	color: var(--text-clr);
+	font-family: monospace;
+}
+
+.treemap-depth-selector {
+	width: 60px;
+	padding: 2px 4px;
+	border: 1px solid var(--tbl-brd-clr);
+	border-radius: 2px;
+	background: var(--td-bckgnd-clr);
+	color: var(--text-clr);
+}
+
+/* Treemap statistics */
+.treemap-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 10px;
+	margin: 10px 0;
+	padding: 10px;
+	background: var(--card-bckgnd-clr);
+	border: 1px solid var(--tbl-brd-clr);
+	border-radius: 4px;
+}
+
+.treemap-stat-item {
+	text-align: center;
+	padding: 8px;
+	border-radius: 3px;
+	background: var(--td-bckgnd-clr);
+}
+
+.treemap-stat-value {
+	font-size: 18px;
+	font-weight: bold;
+	color: var(--link-text-clr);
+}
+
+.treemap-stat-label {
+	font-size: 11px;
+	opacity: 0.7;
+	margin-top: 2px;
+}
+
+/* Treemap breadcrumb navigation */
+.treemap-breadcrumb {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin: 10px 0;
+	padding: 8px 12px;
+	background: var(--card-bckgnd-clr);
+	border: 1px solid var(--tbl-brd-clr);
+	border-radius: 4px;
+	flex-wrap: wrap;
+}
+
+.treemap-breadcrumb-item {
+	color: var(--link-text-clr);
+	text-decoration: none;
+	padding: 2px 6px;
+	border-radius: 2px;
+	transition: background-color 0.2s;
+}
+
+.treemap-breadcrumb-item:hover {
+	background: var(--td-hov-bckgnd-clr);
+}
+
+.treemap-breadcrumb-separator {
+	opacity: 0.5;
+}
+
+.treemap-breadcrumb-current {
+	font-weight: bold;
+	color: var(--text-clr);
+}
+
+/* Treemap legend */
+.treemap-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 10px 0;
+	padding: 10px;
+	background: var(--card-bckgnd-clr);
+	border: 1px solid var(--tbl-brd-clr);
+	border-radius: 4px;
+}
+
+.treemap-legend-item {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 11px;
+}
+
+.treemap-legend-color {
+	width: 16px;
+	height: 16px;
+	border: 1px solid var(--tbl-brd-clr);
+	border-radius: 2px;
+}
+
+/* Treemap tooltip */
+.treemap-tooltip {
+	position: absolute;
+	background: var(--tooltip-bckgnd-clr);
+	border: 1px solid var(--c500);
+	border-radius: 3px;
+	padding: 8px 12px;
+	font-size: 12px;
+	color: var(--text-clr);
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.3s;
+	z-index: 1000;
+	max-width: 300px;
+	word-wrap: break-word;
+}
+
+.treemap-tooltip.visible {
+	opacity: 1;
+	visibility: visible;
+}
+
+.treemap-tooltip-title {
+	font-weight: bold;
+	margin-bottom: 4px;
+	color: var(--link-text-clr);
+}
+
+.treemap-tooltip-row {
+	display: flex;
+	justify-content: space-between;
+	margin: 2px 0;
+}
+
+.treemap-tooltip-label {
+	opacity: 0.7;
+}
+
+.treemap-tooltip-value {
+	font-weight: bold;
+}
+
+/* Treemap loading indicator */
+.treemap-loading {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	text-align: center;
+	color: var(--text-clr);
+	opacity: 0.7;
+}
+
+.treemap-loading-spinner {
+	width: 32px;
+	height: 32px;
+	border: 3px solid var(--c400);
+	border-top: 3px solid var(--link-text-clr);
+	border-radius: 50%;
+	animation: treemap-spin 1s linear infinite;
+	margin: 0 auto 10px;
+}
+
+@keyframes treemap-spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+/* Treemap error message */
+.treemap-error {
+	background: var(--error-clr);
+	color: white;
+	padding: 10px;
+	border-radius: 4px;
+	margin: 10px 0;
+	text-align: center;
+	font-weight: bold;
+}
+
+/* Responsive treemap */
+@media (max-width: 768px) {
+	.treemap-controls {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.treemap-control-group {
+		justify-content: space-between;
+	}
+
+	.treemap-stats {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.treemap-legend {
+		justify-content: center;
+	}
+
+	.treemap-label {
+		font-size: 10px;
+	}
+
+	.treemap-label.small {
+		font-size: 8px;
+	}
+
+	.treemap-label.tiny {
+		font-size: 6px;
+	}
+}
+
+@media (max-width: 480px) {
+	.treemap-stats {
+		grid-template-columns: 1fr;
+	}
+
+	.treemap-container {
+		min-height: 300px;
+	}
+
+	.treemap-svg {
+		min-height: 300px;
+	}
+}

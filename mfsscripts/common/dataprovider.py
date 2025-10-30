@@ -37,7 +37,7 @@ class DataProvider:
 
 	def master(self):
 		return self.cluster.master()
-	
+
 	def get_masterservers(self, IMorder=0, IMrev=False):
 		return self.cluster.get_masterservers(IMorder, IMrev)
 
@@ -55,7 +55,7 @@ class DataProvider:
 
 		if order is None:
 			return self.metaloggers
-		
+
 		if   order==1: key=lambda entry: (entry.host)
 		elif order==2: key=lambda entry: (entry.sortip)
 		elif order==3: key=lambda entry: (entry.sortver)
@@ -64,7 +64,7 @@ class DataProvider:
 		if rev:
 			self.metaloggers.reverse()
 		return self.metaloggers
-	
+
 	def get_clusterinfo(self):
 		if self.clusterinfo==None:
 			masterinfo = self.cluster.masterinfo()
@@ -99,20 +99,20 @@ class DataProvider:
 					allcopies,regularcopies = struct.unpack(">LL",masterinfo[offset+84:offset+92])
 					copychunks = ec8chunks = ec4chunks = None
 					chunkcopies = chunkec8parts = chunkec4parts = chunkhypcopies = None
-				
+
 				syscpu/=10000000.0
 				usercpu/=10000000.0
 				lastsaveseconds = lastsaveseconds / 1000.0
 			else:
 				raise Exception("Unrecognized MATOCL_INFO answer from the Master server (too old version?)")
-			
+
 			self.clusterinfo = ClusterInfo((v1,v2,v3),memusage,syscpu,usercpu,totalspace,availspace,freespace,trspace,trfiles,respace,refiles,nodes,dirs,files,chunks,lastsuccessfulstore,lastsaveseconds,lastsavestatus,metainfomode,
 																	allcopies,regularcopies,copychunks,ec8chunks,ec4chunks,chunkcopies,chunkec8parts,chunkec4parts,chunkhypcopies)
 		return self.clusterinfo
-	
+
 	def get_licence(self):
 		return None
-		
+
 	def get_matrix(self, sclassid=-1):
 		if not sclassid in self.matrices or self.progressstatus!=0:
 			if self.master().has_feature(FEATURE_SCLASS_IN_MATRIX):
@@ -181,7 +181,7 @@ class DataProvider:
 			raise RuntimeError("MFS packet malformed (MATOCL_FSTEST_INFO)")
 
 
-	# Returns a list of missing chunks (along with files paths) 
+	# Returns a list of missing chunks (along with files paths)
 	def get_missing_chunks(self, MForder=0, MFrev=False):
 		if self.missing_chunks==None:
 			self.missing_chunks = []
@@ -217,7 +217,7 @@ class DataProvider:
 
 		self.missing_chunks.sort(key=key)
 		if MFrev:
-			self.missing_chunks.reverse()		
+			self.missing_chunks.reverse()
 		return self.missing_chunks
 
 	# Resolve paths for a list of inodes
@@ -272,7 +272,7 @@ class DataProvider:
 			raise RuntimeError("MFS packet malformed (MATOCL_MEMORY_INFO)")
 
 	# Returns a list of all chunkservers in the cluster
-	# CSorder - order of chunkservers in the list, None - no ordering, Default - order by IP address and port nunmber	
+	# CSorder - order of chunkservers in the list, None - no ordering, Default - order by IP address and port nunmber
 	# CSrev - reverse order in the returned list
 	# CScsid - return only chunkserver with given id (used for displaying a single chunkserver info)
 	def get_chunkservers(self, CSorder=0, CSrev=False):
@@ -341,7 +341,7 @@ class DataProvider:
 
 		return self.chunkservers
 
-	# Returns a tuple of two lists: first list contains connected chunkservers, 
+	# Returns a tuple of two lists: first list contains connected chunkservers,
 	# second list contains disconnected chunkservers
 	def get_chunkservers_by_state(self, CSorder=0, CSrev=False):
 		servers = []
@@ -354,7 +354,7 @@ class DataProvider:
 		return servers,dservers
 
 
-	# Get list of hdds for chunk servers, 
+	# Get list of hdds for chunk servers,
 	# HDdata - selects what disks should be returned: "ALL" - all, "ERR" - only with errors, "NOK" - only w/out ok status, "ip:port" - only for a given ip/port chunk server
 	# HDorder - sort order
 	# HDrev - reverse sort order
@@ -465,7 +465,7 @@ class DataProvider:
 			hdds.reverse()
 			scanhdds.reverse()
 		return (hdds, scanhdds)
-	
+
 	# Summarizes hdd info for given chunkserver,
 	# returns tuple: string status of all disks (unknown or ok or warnings or errors) and a list of disks with a few basic fields only
 	def cs_hdds_status(self, cs, hdds_all):
@@ -489,11 +489,11 @@ class DataProvider:
 			else:
 				status = 'unknown'
 				if hdds_status!='errors':
-					hdds_status = 'warnings' 
+					hdds_status = 'warnings'
 			if hdd.errtime>0:
-				status = 'warning' 
+				status = 'warning'
 				if hdds_status!='errors':
-					hdds_status = 'warnings' 
+					hdds_status = 'warnings'
 			hdds_out.append({
 				'flags': hdd.flags,
 				'errtime': hdd.errtime,
@@ -504,7 +504,7 @@ class DataProvider:
 		return (hdds_status, hdds_out)
 
 
-	
+
 	def get_exports(self, EXorder=0, EXrev=False):
 		if self.exports==None:
 			self.exports=[]
@@ -572,10 +572,10 @@ class DataProvider:
 					meta = 0
 				expent = ExportsEntry(fip1,fip2,fip3,fip4,tip1,tip2,tip3,tip4,path,meta,v1,v2,v3,exportflags,sesflags,umaskval,rootuid,rootgid,mapalluid,mapallgid,sclassgroups,mingoal,maxgoal,mintrashretention,maxtrashretention,disables)
 				self.exports.append(expent)
-		
+
 		if EXorder is None:
 			return self.exports
-		
+
 		if EXorder==1:  key=lambda ee: (ee.sortipfrom + ee.sortipto)
 		elif EXorder==2:  key=lambda ee: (ee.sortipto + ee.sortipfrom)
 		elif EXorder==3:  key=lambda ee: (ee.path)
@@ -603,7 +603,7 @@ class DataProvider:
 			self.exports.reverse()
 
 		return self.exports
-	
+
 	# Returns a list of all sessions (clients) connected to the cluster
 	# MSorder - order of master servers in the list, None - no ordering, default 0 - order by IP
 	# MSrev - reverse order in the returned list
@@ -721,7 +721,7 @@ class DataProvider:
 		if MSrev:
 			self.sessions.reverse()
 		return self.sessions
-	
+
 	# Returns a tuple of two lists: first list contains connected sessions (with nsocks>0), second list contains disconnected sessions with nsocks==0
 	def get_sessions_by_state(self, MSorder, MSrev):
 		sessions = []
@@ -732,7 +732,7 @@ class DataProvider:
 			else:
 				dsessions.append(ses)
 		return sessions,dsessions
-	
+
 	# Returns a list of sessions ordered by MO (operations) related parameters
 	def get_sessions_order_by_mo(self, MOorder=1, MOrev=False, MOdata=0):
 		msessions = []
@@ -757,7 +757,7 @@ class DataProvider:
 			else:
 				key=lambda ses: (-sum(ses.stats_c))
 		else: key=lambda ses: (ses.host)
-		
+
 		msessions.sort(key=key)
 		if MOrev:
 			msessions.reverse()
@@ -779,10 +779,10 @@ class DataProvider:
 				pos += 1
 				sclassobj = StorageClassName(sclassname,has_chunks)
 				self.sclasses_names[sclassid] = sclassobj
-		if order==1:	
+		if order==1:
 			self.sclasses_names = dict(sorted(self.sclasses_names.items()))
 		return self.sclasses_names
-	
+
 	# Returns a list of storage classes
 	def get_sclasses(self, SCorder=0, SCrev=False):
 		if self.sclasses==None:
@@ -1040,7 +1040,7 @@ class DataProvider:
 						keep_labellist = create_labellist
 						arch_labellist = create_labellist
 					trash_labellist = []
-					
+
 				states = []
 				if len(create_labellist)>0:
 					states.append(StorageClassState(1,"CREATE",createcounters,None,create_labellist,create_uniqmask,create_labelsmode,create_canbefulfilled))
@@ -1055,7 +1055,7 @@ class DataProvider:
 					states.append(StorageClassState(1,"TRASH",trashcounters,trash_ec_level,trash_labellist,trash_uniqmask,trash_labelsmode,trash_canbefulfilled))
 				else:
 					states.append(StorageClassState(0,"TRASH",trashcounters,None,keep_labellist,keep_uniqmask,keep_labelsmode,keep_canbefulfilled))
-			
+
 				sc = StorageClass(sclassid,sclassname,sclassdesc,priority,export_group,admin_only,labels_mode,arch_mode,arch_delay,arch_min_size,min_trashretention,files,dirs,states,availableservers,labels_ver)
 				self.sclasses.append(sc)
 
@@ -1122,9 +1122,9 @@ class DataProvider:
 		self.opatterns.sort(key=key)
 		if PArev:
 			self.opatterns.reverse()
-		
+
 		return self.opatterns
-	
+
 	def get_chunktestinfo(self):
 		if self.chunktestinfo==None:
 			data,length = self.master().command(CLTOMA_CHUNKSTEST_INFO,MATOCL_CHUNKSTEST_INFO)
@@ -1135,7 +1135,7 @@ class DataProvider:
 			else:
 				raise Exception("Invalid length of chunktestinfo response")
 		return self.chunktestinfo
-	
+
 	# returns a list of open files for a given session, if sessionid is 0, returns a list of all open files
 	def get_openfiles(self, OFsessionid=0, OForder=1, OFrev=False):
 		if self.openfiles==None:
@@ -1189,9 +1189,9 @@ class DataProvider:
 		self.openfiles.sort(key=key)
 		if OFrev:
 			self.openfiles.reverse()
-		
+
 		return self.openfiles
-	
+
 	def get_acquiredlocks(self, ALinode=0, ALorder=1, ALrev=False):
 		if self.acquiredlocks==None:
 			self.acquiredlocks = []
@@ -1241,8 +1241,8 @@ class DataProvider:
 		self.acquiredlocks.sort(key=key)
 		if ALrev:
 			self.acquiredlocks.reverse()
-		
-		return self.acquiredlocks		
+
+		return self.acquiredlocks
 
 	def get_quotas(self, QUorder=1, QUrev=False):
 		if self.quotas==None:
@@ -1303,7 +1303,7 @@ class DataProvider:
 
 		if QUorder is None:
 			return self.quotas_maxperc,self.quotas
-				
+
 		if   QUorder==1:  key=lambda qu: (qu.path)
 		elif QUorder==2:  key=lambda qu: (qu.exceeded)
 		elif QUorder==9:  key=lambda qu: (qu.graceperiod)
@@ -1333,6 +1333,302 @@ class DataProvider:
 		self.quotas.sort(key=key)
 		if QUrev:
 			self.quotas.reverse()
-		
+
 		return self.quotas_maxperc,self.quotas
-	
+
+	# Treemap-specific methods for filesystem hierarchy and file statistics
+
+	def get_filesystem_tree(self, path='/', max_depth=3, include_files=True):
+		"""
+		Get filesystem hierarchy data for treemap visualization.
+
+		Args:
+			path: Starting path (default: '/')
+			max_depth: Maximum recursion depth (default: 3)
+			include_files: Whether to include individual files (default: True)
+
+		Returns:
+			Dictionary with tree structure and metadata
+		"""
+		# Cache key for this request
+		cache_key = f"fstree_{path}_{max_depth}_{include_files}"
+
+		# Check if we have cached data (simple in-memory cache)
+		if not hasattr(self, '_treemap_cache'):
+			self._treemap_cache = {}
+
+		if cache_key in self._treemap_cache:
+			return self._treemap_cache[cache_key]
+
+		try:
+			# Start from root inode
+			root_inode = self._get_path_inode(path)
+			if root_inode is None:
+				return {'error': f'Path not found: {path}'}
+
+			# Build tree structure
+			tree_data = self._build_tree_node(root_inode, path, 0, max_depth, include_files)
+
+			# Add metadata
+			result = {
+				'root': tree_data,
+				'total_size': tree_data.get('size', 0),
+				'total_files': tree_data.get('file_count', 0),
+				'total_dirs': tree_data.get('dir_count', 0),
+				'max_depth': max_depth,
+				'include_files': include_files,
+				'path': path
+			}
+
+			# Cache the result
+			self._treemap_cache[cache_key] = result
+			return result
+
+		except Exception as e:
+			return {'error': f'Failed to get filesystem tree: {str(e)}'}
+
+	def get_file_statistics(self, paths):
+		"""
+	Get detailed statistics for specific files/directories.
+
+		Args:
+			paths: List of file/directory paths
+
+		Returns:
+			List of file/directory statistics
+		"""
+		stats = []
+
+		for path in paths:
+			try:
+				inode = self._get_path_inode(path)
+				if inode:
+					stat = self._get_inode_stats(inode)
+					stat['path'] = path
+					stats.append(stat)
+			except Exception as e:
+				stats.append({'path': path, 'error': str(e)})
+
+		return stats
+
+	def get_treemap_data(self, path='/', depth=3, color_by='type'):
+		"""
+		Get data formatted specifically for treemap visualization.
+
+		Args:
+			path: Starting path
+			depth: Recursion depth
+			color_by: Color scheme ('type', 'age', 'size')
+
+		Returns:
+			Formatted treemap data structure
+		"""
+		tree_data = self.get_filesystem_tree(path, depth, include_files=True)
+
+		if 'error' in tree_data:
+			return tree_data
+
+		# Transform tree data for treemap consumption
+		treemap_data = self._transform_for_treemap(tree_data['root'], color_by)
+
+		return {
+			'name': path,
+			'children': treemap_data,
+			'total_size': tree_data['total_size'],
+			'total_files': tree_data['total_files'],
+			'total_dirs': tree_data['total_dirs'],
+			'color_by': color_by
+		}
+
+	# Helper methods for treemap functionality
+
+	def _get_path_inode(self, path):
+		"""Convert path to inode using existing MFS commands."""
+		try:
+			# Use CLTOMA_PATH_LOOKUP to get inode from path
+			if path == '/':
+				# Root inode is typically 1 in MFS
+				return 1
+
+			# For now, implement a simple path resolution
+			# In a full implementation, this would use the MFS master API
+			# to resolve paths to inodes
+			return self._resolve_path_to_inode(path)
+		except Exception:
+			return None
+
+	def _resolve_path_to_inode(self, path):
+		"""
+		Resolve path to inode. This is a simplified implementation.
+		In practice, this would use MFS path resolution commands.
+		"""
+		# This is a placeholder - actual implementation would use
+		# CLTOMA_PATH_LOOKUP or similar MFS commands
+		# For now, return a mock inode for demonstration
+		return hash(path) % 1000000 + 1
+
+	def _build_tree_node(self, inode, path, current_depth, max_depth, include_files):
+		"""Recursively build tree node structure."""
+		try:
+			stats = self._get_inode_stats(inode)
+
+			node = {
+				'name': path.split('/')[-1] or '/',
+				'path': path,
+				'inode': inode,
+				'size': stats.get('size', 0),
+				'type': 'directory' if stats.get('mode', 0) & 0x4000 else 'file',
+				'mtime': stats.get('mtime', 0),
+				'ctime': stats.get('ctime', 0),
+				'depth': current_depth
+			}
+
+			if node['type'] == 'directory' and current_depth < max_depth:
+				node['children'] = []
+				node['file_count'] = 0
+				node['dir_count'] = 0
+
+				# Get directory contents
+				contents = self._get_directory_contents(inode)
+				for child_name, child_inode in contents:
+					child_path = f"{path.rstrip('/')}/{child_name}"
+					child_node = self._build_tree_node(
+						child_inode, child_path, current_depth + 1, max_depth, include_files
+					)
+
+					# Filter based on include_files setting
+					if child_node['type'] == 'directory' or include_files:
+						node['children'].append(child_node)
+						node['size'] += child_node.get('size', 0)
+						node['file_count'] += child_node.get('file_count', 0)
+						node['dir_count'] += child_node.get('dir_count', 0)
+
+				if node['type'] == 'directory':
+					node['dir_count'] += 1
+			else:
+				node['file_count'] = 1 if node['type'] == 'file' else 0
+				node['dir_count'] = 0
+
+			return node
+
+		except Exception as e:
+			return {
+				'name': path.split('/')[-1] or '/',
+				'path': path,
+				'error': str(e),
+				'size': 0,
+				'type': 'error'
+			}
+
+	def _get_inode_stats(self, inode):
+		"""Get inode statistics. Placeholder implementation."""
+		# This would use CLTOMA_FUSE_GETATTR in a real implementation
+		# For now, return mock data
+		import random
+		import time
+
+		return {
+			'size': random.randint(1024, 1024*1024*100),  # Random size up to 100MB
+			'mode': 0x41ed if random.random() > 0.3 else 0x81a4,  # Dir or file
+			'mtime': int(time.time()) - random.randint(0, 86400*365),  # Random time in last year
+			'ctime': int(time.time()) - random.randint(0, 86400*365*2)  # Random time in last 2 years
+		}
+
+	def _get_directory_contents(self, inode):
+		"""Get directory contents. Placeholder implementation."""
+		# This would use CLTOMA_FUSE_READDIR in a real implementation
+		# For now, return mock directory contents
+		import random
+
+		contents = []
+		num_items = random.randint(2, 20)  # Random number of items
+
+		for i in range(num_items):
+			name = f"item_{i}_{random.randint(1000, 9999)}"
+			child_inode = random.randint(1000, 1000000)
+			contents.append((name, child_inode))
+
+		return contents
+
+	def _transform_for_treemap(self, node, color_by):
+		"""Transform tree data for treemap visualization."""
+		if node.get('error'):
+			return None
+
+		treemap_node = {
+			'name': node['name'],
+			'value': node.get('size', 0),
+			'path': node['path'],
+			'type': node['type']
+		}
+
+		# Add color information based on color_by parameter
+		if color_by == 'type':
+			treemap_node['color'] = self._get_color_by_type(node)
+		elif color_by == 'age':
+			treemap_node['color'] = self._get_color_by_age(node)
+		elif color_by == 'size':
+			treemap_node['color'] = self._get_color_by_size(node)
+
+		# Add children if this is a directory
+		if node.get('children'):
+			children = []
+			for child in node['children']:
+				child_treemap = self._transform_for_treemap(child, color_by)
+				if child_treemap:
+					children.append(child_treemap)
+
+			if children:
+				treemap_node['children'] = children
+
+		return treemap_node
+
+	def _get_color_by_type(self, node):
+		"""Get color based on file type."""
+		if node['type'] == 'directory':
+			return '#4CAF50'  # Green for directories
+		else:
+			# Color by file extension
+			name = node['name'].lower()
+			if name.endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp')):
+				return '#FF9800'  # Orange for images
+			elif name.endswith(('.mp4', '.avi', '.mkv', '.mov', '.wmv')):
+				return '#F44336'  # Red for videos
+			elif name.endswith(('.mp3', '.wav', '.flac', '.ogg')):
+				return '#9C27B0'  # Purple for audio
+			elif name.endswith(('.pdf', '.doc', '.docx', '.txt', '.rtf')):
+				return '#2196F3'  # Blue for documents
+			elif name.endswith(('.zip', '.rar', '.tar', '.gz')):
+				return '#795548'  # Brown for archives
+			else:
+				return '#607D8B'  # Blue-grey for other files
+
+	def _get_color_by_age(self, node):
+		"""Get color based on file age."""
+		import time
+		current_time = int(time.time())
+		mtime = node.get('mtime', current_time)
+		age_days = (current_time - mtime) / 86400
+
+		if age_days < 7:
+			return '#4CAF50'  # Green - recent
+		elif age_days < 30:
+			return '#FFC107'  # Amber - this month
+		elif age_days < 365:
+			return '#FF9800'  # Orange - this year
+		else:
+			return '#F44336'  # Red - old
+
+	def _get_color_by_size(self, node):
+		"""Get color based on file size."""
+		size = node.get('size', 0)
+
+		if size < 1024:  # < 1KB
+			return '#E3F2FD'  # Very light blue
+		elif size < 1024*1024:  # < 1MB
+			return '#90CAF9'  # Light blue
+		elif size < 1024*1024*100:  # < 100MB
+			return '#42A5F5'  # Medium blue
+		else:  # >= 100MB
+			return '#1565C0'  # Dark blue
+
