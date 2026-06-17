@@ -316,6 +316,20 @@ void main_poll_register_fname (void (*desc)(struct pollfd *,uint32_t *),void (*s
 	pollhead = aux;
 }
 
+/* Performance prep for networking layer (plan item poll->epoll).
+   The current design builds a pollfd array every cycle via the registered
+   xxx_desc() callbacks from matoclserv/matomlserv/mainserv etc, then calls
+   poll(). This is O(N) in the number of fds for both building and waiting.
+   For high client counts this is the scalability limit mentioned in the plan.
+   Next step: switch the wait to epoll_wait (edge triggered) while keeping the
+   desc/serve callbacks (or translate pdesc<->epoll events). The code below
+   reserves the epoll fd; actual switch of the wait can be done without
+   touching every *serv.c . */
+#ifdef __linux__
+#include <sys/epoll.h>
+static int epollfd = -1;
+#endif
+
 void main_eachloop_register_fname (void (*fun)(void),const char *fname) {
 	eloopentry *aux=(eloopentry*)malloc(sizeof(eloopentry));
 	passert(aux);
