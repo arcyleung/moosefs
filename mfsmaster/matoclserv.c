@@ -135,6 +135,17 @@ typedef struct matoclserventry {
 //static session *sessionshead=NULL;
 static matoclserventry *matoclservhead=NULL;
 static int lsock;
+
+/* Performance prep for single-threaded master metadata (plan item #1).
+   All fuse_* ops (lookup, readdir, create, snapshot, ...) currently run
+   serially in the main poll/serve thread calling directly into fs_* with
+   no internal locks in filesystem.c.
+   This skeleton adds a (currently unused) read-only worker queue hook and
+   a flag so that a future thread pool (pcqueue or lock-free) can take
+   read-only metadata ops while mutations stay serialized for changelog
+   and consistency. The actual hand-off of e.g. matoclserv_fuse_lookup can
+   be done later without breaking wire protocol or other components. */
+static uint8_t metadata_readonly_workers_enabled = 0;  /* 0 = legacy single thread */
 static int32_t lsockpdescpos;
 
 static uint64_t master_processid;
