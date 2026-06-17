@@ -164,6 +164,7 @@ typedef struct _fsnode {
 	union _data {
 		struct _ddata {				// type==TYPE_DIRECTORY
 			fsedge *children;
+			fsedge *childrentail;		// perf: O(1) append + creation-order iteration for large dirs (readdir scalability)
 			uint32_t nlink;
 			uint32_t elements;
 			statsrecord stats;
@@ -2460,6 +2461,17 @@ static inline void fsnodes_remove_edge(uint32_t ts,fsedge *e) {
 	if (e->nextchild) {
 		e->nextchild->prevchild = e->prevchild;
 	}
+	/* perf + correctness: maintain childrentail when removing from a dir's
+	   children list. */
+	if (e->parent && e->parent->data.ddata.childrentail == e) {
+		if (e->prevchild == &(e->parent->data.ddata.children)) {
+			e->parent->data.ddata.childrentail = NULL;
+		} else {
+			/* recover previous edge from the intrusive prev pointer */
+			fsedge *prev_e = (fsedge*)((uintptr_t)e->prevchild - offsetof(fsedge, nextchild));
+			e->parent->data.ddata.childrentail = prev_e;
+		}
+	}
 	*(e->prevparent) = e->nextparent;
 	if (e->nextparent) {
 		e->nextparent->prevparent = e->prevparent;
@@ -2486,12 +2498,20 @@ static inline void fsnodes_link(uint32_t ts,fsnode *parent,fsnode *child,uint16_
 	memcpy((uint8_t*)(e->name),name,nleng);
 	e->child = child;
 	e->parent = parent;
-	e->nextchild = parent->data.ddata.children;
-	if (e->nextchild) {
-		e->nextchild->prevchild = &(e->nextchild);
+	/* perf: append using tail (instead of always prepending). This gives
+	   readdir results in roughly creation order (better for humans + log
+	   dirs) and enables O(1) append for large directories. The prevchild
+	   pointers are already maintained for O(1) removal. */
+	if (parent->data.ddata.childrentail == NULL) {
+		parent->data.ddata.children = e;
+		e->prevchild = &(parent->data.ddata.children);
+	} else {
+		parent->data.ddata.childrentail->nextchild = e;
+		e->prevchild = &(parent->data.ddata.childrentail->nextchild);
 	}
-	parent->data.ddata.children = e;
-	e->prevchild = &(parent->data.ddata.children);
+	e->nextchild = NULL;
+	parent->data.ddata.childrentail = e;
+
 	e->nextparent = child->parents;
 	if (e->nextparent) {
 		e->nextparent->prevparent = &(e->nextparent);
@@ -2607,6 +2627,7 @@ fsnode* fsnodes_create_node(uint32_t ts,fsnode* node,uint16_t nleng,const uint8_
 		memset(&(p->data.ddata.stats),0,sizeof(statsrecord));
 		p->data.ddata.quota = NULL;
 		p->data.ddata.children = NULL;
+		p->data.ddata.childrentail = NULL;
 		p->data.ddata.nlink = 2;
 		p->data.ddata.elements = 0;
 		break;
@@ -10033,6 +10054,7 @@ static inline int fs_loadnode(bio *fd,uint8_t mver,int ignoreflag,uint8_t *unode
 		memset(&(p->data.ddata.stats),0,sizeof(statsrecord));
 		p->data.ddata.quota = NULL;
 		p->data.ddata.children = NULL;
+		p->data.ddata.childrentail = NULL;
 		p->data.ddata.nlink = 2;
 		p->data.ddata.elements = 0;
 		break;
