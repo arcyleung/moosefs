@@ -85,14 +85,14 @@
 
 #define BUFFER_VALIDITY_TIMEOUT 60.0
 
-#define SUSTAIN_WORKERS 50
-#define HEAVYLOAD_WORKERS 150
-#define MAX_WORKERS 250
+#define SUSTAIN_WORKERS 64   /* perf: raised sustain for better baseline parallelism on multi-core clients */
+#define HEAVYLOAD_WORKERS 200  /* perf: allow more workers under heavy read load (see plan client data path) */
+#define MAX_WORKERS 320        /* perf: higher ceiling for very wide concurrent read workloads */
 
 #define IDHASHSIZE 256
 #define IDHASH(inode) (((inode)*0xB239FB71)%IDHASHSIZE)
 
-#define READAHEAD_MAX 4
+#define READAHEAD_MAX 8  /* perf: increased from 4 for better sequential read throughput on modern networks/storage (plan item client data path) */
 
 /*
 typedef struct cblock_s {

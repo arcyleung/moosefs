@@ -87,7 +87,7 @@
 #endif
 
 // for Nagle's-like algorithm
-#define NEXT_BLOCK_DELAY 0.05
+#define NEXT_BLOCK_DELAY 0.02  /* perf: slightly more aggressive coalescing for small writes while still batching (trade-off tuned for throughput) */
 
 #define CHUNKSERVER_ACTIVITY_TIMEOUT 5.0
 
@@ -99,11 +99,11 @@
 
 #define WORKER_NOP_INTERVAL 1.0
 
-#define MAX_SIM_CHUNKS 16
+#define MAX_SIM_CHUNKS 32  /* perf: increased concurrent in-flight chunks per inode for large-file writes on fast backends */
 
-#define SUSTAIN_WORKERS 50
-#define HEAVYLOAD_WORKERS 150
-#define MAX_WORKERS 250
+#define SUSTAIN_WORKERS 64   /* perf: raised sustain for better baseline parallelism on multi-core clients (matches readdata) */
+#define HEAVYLOAD_WORKERS 200  /* perf: allow more workers under heavy write load */
+#define MAX_WORKERS 320        /* perf: higher ceiling for very wide concurrent write workloads */
 
 #define WCHASHSIZE 256
 #define WCHASH(inode,indx) (((inode)*0xB239FB71+(indx)*193)%WCHASHSIZE)
