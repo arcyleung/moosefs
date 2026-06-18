@@ -230,6 +230,8 @@ class TreemapRenderer {
 
     /**
      * Squarified treemap algorithm implementation
+     * Improved to use multiple rows/strips for better aspect ratios when sibling sizes vary greatly.
+     * This avoids long skinny strips across the full dimension.
      */
     squarify(nodes, x, y, width, height) {
         if (nodes.length === 0) return [];
@@ -239,66 +241,142 @@ class TreemapRenderer {
 
         if (totalSize === 0) return [];
 
-        let currentX = x;
-        let currentY = y;
-        let remainingWidth = width;
-        let remainingHeight = height;
+        // Greedy row-based squarify to keep rectangles closer to square
+        let i = 0;
+        while (i < nodes.length) {
+            const row = [];
+            let rowTotal = 0;
+            let bestWorst = Infinity;
+            let j = i;
 
-        // Determine layout direction (horizontal vs vertical)
-        const isHorizontal = width >= height;
+            // Build a row: add nodes while it improves (or doesn't worsen) the worst aspect
+            for (; j < nodes.length; j++) {
+                const candidate = nodes[j];
+                const candidateSize = candidate.size;
+                const testRow = row.concat([candidate]);
+                const testTotal = rowTotal + candidateSize;
 
-        for (let i = 0; i < nodes.length; i++) {
-            const node = nodes[i];
-            const nodeSize = node.size;
-            const nodePercentage = nodeSize / totalSize;
+                const testAspect = this._worstAspect(testRow, testTotal, width, height);
 
-            let nodeWidth, nodeHeight;
-
-            if (isHorizontal) {
-                nodeWidth = remainingWidth * nodePercentage;
-                nodeHeight = remainingHeight;
-            } else {
-                nodeWidth = remainingWidth;
-                nodeHeight = remainingHeight * nodePercentage;
+                if (testAspect <= bestWorst || row.length === 0) {
+                    row.push(candidate);
+                    rowTotal = testTotal;
+                    bestWorst = testAspect;
+                } else {
+                    break;
+                }
             }
 
-            // Apply padding
-            const paddedX = currentX + this.config.padding;
-            const paddedY = currentY + this.config.padding;
-            const paddedWidth = Math.max(0, nodeWidth - 2 * this.config.padding);
-            const paddedHeight = Math.max(0, nodeHeight - 2 * this.config.padding);
+            if (row.length === 0) {
+                // fallback, shouldn't happen
+                row.push(nodes[i]);
+                rowTotal = nodes[i].size;
+                j = i + 1;
+            }
 
-            if (paddedWidth > 0 && paddedHeight > 0) {
-                // Calculate layout for this node's children
+            // Layout this row as a strip
+            const rowLayout = this._layoutRow(row, rowTotal, x, y, width, height);
+            layout.push(...rowLayout);
+
+            // Advance
+            i = j;
+
+            // Update remaining space for next row (we consume the strip)
+            // For simplicity, we always consume full in one direction per row; subsequent rows use remaining.
+            // To keep simple and fill space: we treat subsequent as new "container" but adjust y/x.
+            if (width >= height) {
+                // horizontal rows: consume height
+                const rowHeight = rowLayout.length > 0 ? rowLayout[0].height : height / (nodes.length - i + 1);
+                y += rowHeight;
+                height -= rowHeight;
+            } else {
+                const rowWidth = rowLayout.length > 0 ? rowLayout[0].width : width / (nodes.length - i + 1);
+                x += rowWidth;
+                width -= rowWidth;
+            }
+        }
+
+        return layout;
+    }
+
+    /**
+     * Compute worst aspect ratio for a candidate row (used for greedy choice)
+     */
+    _worstAspect(row, rowTotal, containerWidth, containerHeight) {
+        if (rowTotal === 0) return Infinity;
+        const isHorizontal = containerWidth >= containerHeight;
+        let worst = 0;
+        for (let node of row) {
+            const p = node.size / rowTotal;
+            let w, h;
+            if (isHorizontal) {
+                w = containerWidth * p;
+                h = containerHeight;
+            } else {
+                w = containerWidth;
+                h = containerHeight * p;
+            }
+            const ar = Math.max(w / h, h / w);
+            if (ar > worst) worst = ar;
+        }
+        return worst;
+    }
+
+    /**
+     * Layout a row of nodes as a single strip (horizontal or vertical)
+     * Returns array of positioned leaf (or sub-layout) items with x,y,w,h,color
+     */
+    _layoutRow(row, rowTotal, x, y, containerWidth, containerHeight) {
+        if (row.length === 0 || rowTotal === 0) return [];
+
+        const layout = [];
+        const isHorizontal = containerWidth >= containerHeight;
+
+        let currentX = x;
+        let currentY = y;
+        let remW = containerWidth;
+        let remH = containerHeight;
+
+        for (let node of row) {
+            const p = node.size / rowTotal;
+            let nodeW, nodeH;
+
+            if (isHorizontal) {
+                nodeW = containerWidth * p;
+                nodeH = containerHeight;
+            } else {
+                nodeW = containerWidth;
+                nodeH = containerHeight * p;
+            }
+
+            const padX = currentX + this.config.padding;
+            const padY = currentY + this.config.padding;
+            const padW = Math.max(0, nodeW - 2 * this.config.padding);
+            const padH = Math.max(0, nodeH - 2 * this.config.padding);
+
+            if (padW > 0 && padH > 0) {
                 if (node.children && node.children.length > 0) {
-                    const childLayout = this.calculateLayout(
-                        node, paddedX, paddedY, paddedWidth, paddedHeight
-                    );
-                    layout.push(...childLayout);
+                    const sub = this.calculateLayout(node, padX, padY, padW, padH);
+                    layout.push(...sub);
                 } else {
-                    // Leaf node
                     layout.push({
                         node: node,
-                        x: paddedX,
-                        y: paddedY,
-                        width: paddedWidth,
-                        height: paddedHeight,
+                        x: padX,
+                        y: padY,
+                        width: padW,
+                        height: padH,
                         color: this.getNodeColor(node)
                     });
                 }
             }
 
-            // Update position for next node
             if (isHorizontal) {
-                currentX += nodeWidth;
-                remainingWidth -= nodeWidth;
+                currentX += nodeW;
+                remW -= nodeW;
             } else {
-                currentY += nodeHeight;
-                remainingHeight -= nodeHeight;
+                currentY += nodeH;
+                remH -= nodeH;
             }
-
-            // Stop if we run out of space
-            if (remainingWidth <= 0 || remainingHeight <= 0) break;
         }
 
         return layout;
@@ -739,44 +817,184 @@ class TreemapRenderer {
 /**
  * Initialize treemap when DOM is ready
  */
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-initialize treemaps with data-treemap attribute
-    const treemapElements = document.querySelectorAll('[data-treemap]');
+function setupTreemapControls(treemap) {
+  const pathInput = document.getElementById('treemap-path');
+  if (pathInput) {
+    pathInput.addEventListener('change', function() { updateTreemap(); });
+  }
 
-    treemapElements.forEach(element => {
-        const containerId = element.id || `treemap-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        element.id = containerId;
+  const depthSelect = document.getElementById('treemap-depth');
+  if (depthSelect) {
+    depthSelect.addEventListener('change', function() { updateTreemap(); });
+  }
 
-        const options = {
-            colorScheme: element.getAttribute('data-color-scheme') || 'type',
-            includeFiles: element.getAttribute('data-include-files') !== 'false',
-            maxDepth: parseInt(element.getAttribute('data-max-depth')) || 3
-        };
-
-        // Create treemap instance
-        const treemap = new TreemapRenderer(containerId, options);
-
-        // Store instance for later access
-        element.treemapInstance = treemap;
-
-        // Load data if provided
-        const dataUrl = element.getAttribute('data-url');
-        if (dataUrl) {
-            treemap.showLoading();
-            fetch(dataUrl)
-                .then(response => response.json())
-                .then(data => {
-                    treemap.setData(data);
-                    treemap.hideLoading();
-                })
-                .catch(error => {
-                    treemap.showError(`Failed to load treemap data: ${error.message}`);
-                });
-        }
+  const colorSelect = document.getElementById('treemap-color-scheme');
+  if (colorSelect) {
+    colorSelect.addEventListener('change', function() {
+      if (treemap && typeof treemap.updateConfig === 'function') {
+        treemap.updateConfig({ colorScheme: this.value });
+      }
+      if (typeof updateLegend === 'function') updateLegend();
     });
+  }
+
+  const includeFilesCheckbox = document.getElementById('treemap-include-files');
+  if (includeFilesCheckbox) {
+    includeFilesCheckbox.addEventListener('change', function() { updateTreemap(); });
+  }
+
+  const refreshButton = document.getElementById('treemap-refresh');
+  if (refreshButton) {
+    refreshButton.addEventListener('click', function() { updateTreemap(); });
+  }
+}
+
+function updateTreemap() {
+  const pathEl = document.getElementById('treemap-path');
+  const depthEl = document.getElementById('treemap-depth');
+  const includeEl = document.getElementById('treemap-include-files');
+
+  const path = pathEl ? pathEl.value : '/';
+  const depth = depthEl ? parseInt(depthEl.value) : 3;
+  const includeFiles = includeEl ? includeEl.checked : true;
+
+  const url = new URL(window.location);
+  url.searchParams.set('path', path);
+  url.searchParams.set('depth', depth);
+  url.searchParams.set('include_files', includeFiles ? '1' : '0');
+  window.location.href = url.toString();
+}
+
+function onTreemapNavigate(path) {
+  const pathEl = document.getElementById('treemap-path');
+  if (pathEl) pathEl.value = path;
+  updateTreemap();
+}
+
+function updateLegend() {
+  const colorSchemeEl = document.getElementById('treemap-color-scheme');
+  const legend = document.getElementById('treemap-legend');
+  if (!colorSchemeEl || !legend) return;
+
+  const colorScheme = colorSchemeEl.value;
+
+  const legends = {
+    'type': [
+      { color: 'var(--treemap-color-directory)', label: 'Directory' },
+      { color: 'var(--treemap-color-image)', label: 'Images' },
+      { color: 'var(--treemap-color-video)', label: 'Videos' },
+      { color: 'var(--treemap-color-audio)', label: 'Audio' },
+      { color: 'var(--treemap-color-document)', label: 'Documents' },
+      { color: 'var(--treemap-color-archive)', label: 'Archives' },
+      { color: 'var(--treemap-color-code)', label: 'Code' },
+      { color: 'var(--treemap-color-other)', label: 'Other' }
+    ],
+    'age': [
+      { color: 'var(--treemap-age-veryrecent)', label: 'Very Recent (< 1 day)' },
+      { color: 'var(--treemap-age-recent)', label: 'Recent (1-7 days)' },
+      { color: 'var(--treemap-age-medium)', label: 'Medium (1-30 days)' },
+      { color: 'var(--treemap-age-old)', label: 'Old (1-12 months)' },
+      { color: 'var(--treemap-age-veryold)', label: 'Very Old (> 1 year)' }
+    ],
+    'size': [
+      { color: 'var(--treemap-size-tiny)', label: 'Tiny (< 1 KB)' },
+      { color: 'var(--treemap-size-small)', label: 'Small (1 KB - 1 MB)' },
+      { color: 'var(--treemap-size-medium)', label: 'Medium (1 MB - 1 GB)' },
+      { color: 'var(--treemap-size-large)', label: 'Large (1-10 GB)' },
+      { color: 'var(--treemap-size-huge)', label: 'Huge (> 10 GB)' }
+    ]
+  };
+
+  const legendItems = legends[colorScheme] || [];
+  let html = '';
+  legendItems.forEach(item => {
+    html += `
+      <div class="treemap-legend-item">
+        <div class="treemap-legend-color" style="background-color: ${item.color}"></div>
+        <span>${item.label}</span>
+      </div>`;
+  });
+  legend.innerHTML = html;
+}
+
+function initTreemapElement(element) {
+  if (!element || element.treemapInstance) return;
+
+  const containerId = element.id || `treemap-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  element.id = containerId;
+
+  const options = {
+    colorScheme: element.getAttribute('data-color-scheme') || 'type',
+    includeFiles: element.getAttribute('data-include-files') !== 'false',
+    maxDepth: parseInt(element.getAttribute('data-max-depth')) || 3
+  };
+
+  const treemap = new TreemapRenderer(containerId, options);
+  element.treemapInstance = treemap;
+
+  // Prefer data embedded in a safe json script tag (works with innerHTML inserts)
+  let dataScript = document.getElementById('treemap-initial-data');
+  if (dataScript) {
+    try {
+      const data = JSON.parse(dataScript.textContent || dataScript.innerHTML);
+      treemap.setData(data);
+      // remove the data script so it doesn't interfere on future inits
+      dataScript.parentNode && dataScript.parentNode.removeChild(dataScript);
+    } catch (e) {
+      console.error('Failed to parse embedded treemap initial data', e);
+    }
+  } else {
+    // legacy data-url support (for full page loads or other use cases)
+    const dataUrl = element.getAttribute('data-url');
+    if (dataUrl) {
+      treemap.showLoading();
+      fetch(dataUrl)
+        .then(r => r.json())
+        .then(d => { treemap.setData(d); treemap.hideLoading(); })
+        .catch(err => treemap.showError('Failed to load treemap data: ' + err.message));
+    }
+  }
+
+  // Wire up the control panel (path, depth, color, include-files, refresh)
+  setupTreemapControls(treemap);
+
+  // custom navigation from inside the treemap (breadcrumb / clicks)
+  element.addEventListener('treemapNavigate', function(e) {
+    if (e && e.detail && e.detail.path) onTreemapNavigate(e.detail.path);
+  });
+
+  // initial legend for the current color scheme
+  if (typeof updateLegend === 'function') updateLegend();
+}
+
+// Run on initial DOM ready (full page load with ?sections=TM)
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-treemap]').forEach(initTreemapElement);
 });
 
-// Export for use in other modules
+// Support for sections/tabs that are inserted later via innerHTML (the common pattern in this GUI)
+const __treemapObserver = new MutationObserver(function(mutations) {
+  mutations.forEach(function(mutation) {
+    mutation.addedNodes.forEach(function(node) {
+      if (node.nodeType !== 1) return; // elements only
+      if (node.hasAttribute && node.hasAttribute('data-treemap')) {
+        initTreemapElement(node);
+      }
+      if (node.querySelectorAll) {
+        node.querySelectorAll('[data-treemap]').forEach(initTreemapElement);
+      }
+    });
+  });
+});
+__treemapObserver.observe(document.documentElement || document.body, {
+  childList: true,
+  subtree: true
+});
+
+// Export for use in other modules (Node) and browser
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = TreemapRenderer;
+}
+if (typeof window !== 'undefined') {
+    window.TreemapRenderer = TreemapRenderer;
 }

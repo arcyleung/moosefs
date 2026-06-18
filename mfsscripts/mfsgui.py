@@ -336,7 +336,22 @@ if org.shall_render("QU"):
 # Treemap
 if org.shall_render("TM"):
 	try:
-		print("""<script src="assets/treemap.js" type="text/javascript"></script>""")
+		# Inline the treemap JS so it works even when static assets (/assets/treemap.js)
+		# are not served (e.g. running the python mfs.cgi directly without a frontend web server).
+		# This makes the treemap self-contained for the section.
+		try:
+			import os
+			script_dir = os.path.dirname(os.path.abspath(__file__))
+			js_path = os.path.join(script_dir, 'assets', 'treemap.js')
+			with open(js_path, 'r') as f:
+				treemap_js_content = f.read()
+			print('<script type="text/javascript">')
+			print(treemap_js_content)
+			print('</script>')
+		except Exception:
+			# Fallback to external src if inlining fails (e.g. file not present)
+			print("""<script src="/assets/treemap.js" type="text/javascript"></script>""")
+
 		import views.files_treemap
 		print_out(views.files_treemap.render(dataprovider, fields, vld))
 	except Exception:

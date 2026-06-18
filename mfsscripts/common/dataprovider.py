@@ -1429,43 +1429,47 @@ class DataProvider:
 			return tree_data
 
 		# Transform tree data for treemap consumption
-		treemap_data = self._transform_for_treemap(tree_data['root'], color_by)
+		treemap_root = self._transform_for_treemap(tree_data['root'], color_by)
 
-		return {
-			'name': path,
-			'children': treemap_data,
-			'total_size': tree_data['total_size'],
-			'total_files': tree_data['total_files'],
-			'total_dirs': tree_data['total_dirs'],
-			'color_by': color_by
-		}
+		if treemap_root is None:
+			return {'error': 'Failed to transform tree data'}
+
+		# Augment root with summary stats for renderer/stats
+		treemap_root['total_size'] = tree_data.get('total_size', 0)
+		treemap_root['total_files'] = tree_data.get('total_files', 0)
+		treemap_root['total_dirs'] = tree_data.get('total_dirs', 0)
+		treemap_root['color_by'] = color_by
+
+		# Ensure root 'value' for JS size/percent calcs
+		treemap_root['value'] = treemap_root.get('total_size', treemap_root.get('value', 0))
+
+		return treemap_root
 
 	# Helper methods for treemap functionality
 
 	def _get_path_inode(self, path):
-		"""Convert path to inode using existing MFS commands."""
+		"""Convert path to inode using CLTOMA_PATH_LOOKUP."""
+		if path in ('/', ''):
+			return 1
 		try:
-			# Use CLTOMA_PATH_LOOKUP to get inode from path
-			if path == '/':
-				# Root inode is typically 1 in MFS
+			p = path.encode('utf-8').lstrip(b'/')
+			if not p:
 				return 1
-
-			# For now, implement a simple path resolution
-			# In a full implementation, this would use the MFS master API
-			# to resolve paths to inodes
-			return self._resolve_path_to_inode(path)
+			pleng = len(p)
+			# msgid(4) + base_inode(4) + pleng(4) + path + uid(4) + gids(4) + gid0(4)
+			# use uid=0, gids=1, gid=0 for privileged walk
+			data = struct.pack(">LLL", 0, 1, pleng) + p + struct.pack(">LLL", 0, 1, 0)
+			ans, length = self.master().command(CLTOMA_PATH_LOOKUP, MATOCL_PATH_LOOKUP, data)
+			if length < 13:
+				return None
+			# ans starts with msgid(4) + parent(4) + nl(1) + name... + inode(4) + attr...
+			off = 4 + 4
+			nleng = ans[off] if isinstance(ans[off], int) else ans[off]
+			off += 1 + nleng
+			inode = struct.unpack(">L", ans[off:off+4])[0]
+			return inode
 		except Exception:
 			return None
-
-	def _resolve_path_to_inode(self, path):
-		"""
-		Resolve path to inode. This is a simplified implementation.
-		In practice, this would use MFS path resolution commands.
-		"""
-		# This is a placeholder - actual implementation would use
-		# CLTOMA_PATH_LOOKUP or similar MFS commands
-		# For now, return a mock inode for demonstration
-		return hash(path) % 1000000 + 1
 
 	def _build_tree_node(self, inode, path, current_depth, max_depth, include_files):
 		"""Recursively build tree node structure."""
@@ -1520,34 +1524,79 @@ class DataProvider:
 				'type': 'error'
 			}
 
-	def _get_inode_stats(self, inode):
-		"""Get inode statistics. Placeholder implementation."""
-		# This would use CLTOMA_FUSE_GETATTR in a real implementation
-		# For now, return mock data
-		import random
-		import time
-
+	def _parse_attr(self, attr):
+		"""Parse MFS attr record (supports 35/36 byte variants). Returns dict with size, mode, mtime etc."""
+		if not attr:
+			return {'size': 0, 'mode': 0, 'mtime': 0, 'ctime': 0}
+		a = attr + b'\0' * max(0, 36 - len(attr))
+		try:
+			mode = struct.unpack(">H", a[0:2])[0]
+			mtime = struct.unpack(">L", a[14:18])[0]
+			ctime = struct.unpack(">L", a[18:22])[0]
+			# length is a 64-bit at the end of the record in current formats
+			size = struct.unpack(">Q", a[28:36])[0]
+		except Exception:
+			mode = 0
+			mtime = ctime = 0
+			size = 0
 		return {
-			'size': random.randint(1024, 1024*1024*100),  # Random size up to 100MB
-			'mode': 0x41ed if random.random() > 0.3 else 0x81a4,  # Dir or file
-			'mtime': int(time.time()) - random.randint(0, 86400*365),  # Random time in last year
-			'ctime': int(time.time()) - random.randint(0, 86400*365*2)  # Random time in last 2 years
+			'size': size,
+			'mode': mode,
+			'mtime': mtime,
+			'ctime': ctime,
 		}
 
+	def _get_inode_stats(self, inode):
+		"""Get inode statistics via CLTOMA_FUSE_GETATTR."""
+		try:
+			# msgid(4) + inode(4) + uid(4) + gid(4)   (short form, no "opened")
+			data = struct.pack(">LLLL", 0, inode, 0, 0)
+			ans, length = self.master().command(CLTOMA_FUSE_GETATTR, MATOCL_FUSE_GETATTR, data)
+			if length <= 5:
+				return {'size': 0, 'mode': 0, 'mtime': 0, 'ctime': 0}
+			# response payload: msgid(4) + attr[asize]
+			attr = ans[4:]
+			st = self._parse_attr(attr)
+			return st
+		except Exception:
+			return {'size': 0, 'mode': 0, 'mtime': 0, 'ctime': 0}
+
 	def _get_directory_contents(self, inode):
-		"""Get directory contents. Placeholder implementation."""
-		# This would use CLTOMA_FUSE_READDIR in a real implementation
-		# For now, return mock directory contents
-		import random
-
+		"""Get directory contents via CLTOMA_FUSE_READDIR (with attributes when possible)."""
 		contents = []
-		num_items = random.randint(2, 20)  # Random number of items
-
-		for i in range(num_items):
-			name = f"item_{i}_{random.randint(1000, 9999)}"
-			child_inode = random.randint(1000, 1000000)
-			contents.append((name, child_inode))
-
+		try:
+			# Use a request that is accepted: msgid + inode + uid + gids(1) + gid + flags + ...
+			# Short-ish modern variant without full pagination first.
+			# msgid(4) + inode(4) + uid(4) + gids(4) + gid(4) + flags(1) + max(4) + edgeid(8)
+			data = struct.pack(">LLLLLLLQ", 0, inode, 0, 1, 0, 0x01, 10000, 0)  # wantattr-ish via flags
+			ans, length = self.master().command(CLTOMA_FUSE_READDIR, MATOCL_FUSE_READDIR, data)
+			if length <= 5:
+				return contents
+			# payload after send: starts with msgid(4) + [edgeid(8)?] + entries
+			# entries: repeated [u8 nleng, name, u32 inode, attrbytes]
+			pos = 4
+			# If the response included the continued edgeid (when we sent the long form), skip 8
+			if length > 12:
+				pos += 8
+			while pos < length:
+				if pos + 1 > length:
+					break
+				nleng = ans[pos]
+				pos += 1
+				if pos + nleng + 4 > length:
+					break
+				name = ans[pos:pos+nleng].decode('utf-8', 'replace')
+				pos += nleng
+				child_inode = struct.unpack(">L", ans[pos:pos+4])[0]
+				pos += 4
+				# try to consume an attr (36 bytes typical); if not enough just skip
+				asz = 36
+				if pos + asz <= length:
+					# we could parse attr here if wanted for optimization
+					pos += asz
+				contents.append((name, child_inode))
+		except Exception:
+			pass
 		return contents
 
 	def _transform_for_treemap(self, node, color_by):
@@ -1557,7 +1606,8 @@ class DataProvider:
 
 		treemap_node = {
 			'name': node['name'],
-			'value': node.get('size', 0),
+			'size': node.get('size', 0),
+			'value': node.get('size', 0),  # for compatibility
 			'path': node['path'],
 			'type': node['type']
 		}
