@@ -1,4 +1,4 @@
-.TH mfsstatsdump "8" "May 2026" "MooseFS 4.59.2-1" "This is part of MooseFS"
+.TH mfsstatsdump "8" "October 2025" "MooseFS 4.58.1-1" "This is part of MooseFS"
 .ss 12 0
 .SH NAME
 mfsstatsdump \- dump usage data from master stats file in csv or png format
@@ -170,7 +170,7 @@ delete_err
 Number of unsuccessful chunk deletions
 .TP
 delete_stat
-Sum of successful and unsuccessful chunk deletions (in png shows both delete_ok and delete_err using two colors)
+Sum of succesful and unsuccessful chunk deletions (in png shows both delete_ok and delete_err using two colors)
 .TP
 replicate_ok
 Number of successful chunk replications
@@ -179,7 +179,7 @@ replicate_err
 Number of unsuccessful chunk replications
 .TP
 replicate_stat
-Sum of successful and unsuccessful chunk replications (in png shows both replicate_ok and replicate_err using two colors)
+Sum of succesful and unsuccessful chunk replications (in png shows both replicate_ok and replicate_err using two colors)
 .TP
 create_ok
 Number of successful chunk creations
@@ -188,7 +188,7 @@ create_err
 Number of unsuccessful chunk creations
 .TP
 create_stat
-Sum of successful and unsuccessful chunk creations (in png shows both create_ok and create_err using two colors)
+Sum of succesful and unsuccessful chunk creations (in png shows both create_ok and create_err using two colors)
 .TP
 change_ok
 Number of successful chunk internal operations
@@ -197,7 +197,7 @@ change_err
 Number of unsuccessful chunk internal operations
 .TP
 change_stat
-Sum of successful and unsuccessfulchunk internal operations (in png shows both change_ok and change_err using two colors)
+Sum of succesful and unsuccessfulchunk internal operations (in png shows both change_ok and change_err using two colors)
 .TP
 split_ok
 Number of successful chunk split operations
@@ -206,7 +206,7 @@ split_err
 Number of unsuccessful chunk split operations
 .TP
 split_stat
-Sum of successful and unsuccessful chunk split operations (in png shows both split_ok and split_err using two colors)
+Sum of succesful and unsuccessful chunk split operations (in png shows both split_ok and split_err using two colors)
 .TP
 fileobjects
 Number of file objects
@@ -314,7 +314,7 @@ Same goes for \fBreplicate\fP(_stat), \fBcreate\fP(_stat), \fBchange\fP(_stat) a
 .SH "REPORTING BUGS"
 Report bugs to <bugs@moosefs.com>.
 .SH COPYRIGHT
-Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 
 This file is part of MooseFS.
 
@@ -328,8 +328,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, see
-<https://www.gnu.org/licenses/>.
+along with MooseFS; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+or visit http://www.gnu.org/licenses/gpl-2.0.html
 .SH "SEE ALSO"
 .BR mfsmount (8),
 .BR moosefs (7)

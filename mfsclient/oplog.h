@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifndef _OPLOG_H_
@@ -24,16 +25,16 @@
 
 #include <inttypes.h>
 
-#if defined(__printflike)
-#	define PRINTF_LIKE(fmt, args) __printflike(fmt, args)
-#elif defined(__GNUC__) || defined(__clang__)
-#	define PRINTF_LIKE(fmt, args) __attribute__((format(printf, fmt, args)))
+#ifndef __printflike
+#ifdef __GNUC__
+#define __printflike(fmt,va1) __attribute__((__format__(printf, fmt, va1)))
 #else
-#	define PRINTF_LIKE(fmt, args)
+#define __printflike(fmt, va1)
 #endif
+#endif /* __printflike */
 
-void oplog_printf(const struct fuse_ctx *ctx,const char *format,...) PRINTF_LIKE(2, 3);
-void oplog_msg(const char *format,...) PRINTF_LIKE(1, 2);
+void oplog_printf(const struct fuse_ctx *ctx,const char *format,...) __printflike(2, 3);
+void oplog_msg(const char *format,...) __printflike(1, 2);
 unsigned long oplog_newhandle(int hflag);
 void oplog_releasehandle(unsigned long fh);
 void oplog_getdata(unsigned long fh,uint8_t **buff,uint32_t *leng,uint32_t maxleng);

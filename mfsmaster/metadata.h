@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifndef _METADATA_H_
@@ -30,6 +31,8 @@ void meta_setignoreflag(void);
 void meta_allowautorestore(void);
 void meta_emptystart(void);
 void meta_incverboselevel(void);
+void meta_sendall(int socket);
+int meta_downloadall(int socket);
 void meta_do_store_metadata(void);
 
 uint64_t meta_get_id(void);

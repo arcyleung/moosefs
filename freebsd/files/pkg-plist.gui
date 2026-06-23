@@ -3,7 +3,9 @@ sbin/mfsgui
 sbin/mfscgiserv
 man/man5/mfsgui.cfg.5.gz
 man/man8/mfsgui.8.gz
-@dir(%%USER%%,%%GROUP%%,) %%MFS_WORKDIR%%/mfs
+@owner mfs
+@group mfs
+@dir %%MFS_WORKDIR%%/mfs
 share/mfscgi/requests.cfg
 share/mfscgi/mfs.cgi
 share/mfscgi/chart.cgi

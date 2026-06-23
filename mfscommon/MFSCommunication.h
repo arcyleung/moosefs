@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifndef _MFS_COMMUNICATION_H_
@@ -81,8 +82,6 @@
 #define MFS_NAME_MAX 255
 #define MFS_SYMLINK_MAX 4096
 #define MFS_PATH_MAX 1024
-
-#define MFS_GIDS_MAX 4096
 
 #define MFS_MAX_FILE_SIZE (((uint64_t)(MFSCHUNKSIZE))<<31)
 
@@ -340,7 +339,7 @@
 //
 // SET_CURRENTTIME_FLAG - version > 2.1.12
 
-// lookup.lflags (acl's must be checked separately - A:r,B:w doesn't give user belonging to A and B both r and w rights)
+// lookup.lflags (acl's must be checked separatelly - A:r,B:w doesn't give user belonging to A and B both r and w rights)
 #define LOOKUP_ACCESS_MODE_0               0x0001
 #define LOOKUP_ACCESS_MODE_X               0x0002
 #define LOOKUP_ACCESS_MODE_W               0x0004
@@ -588,7 +587,7 @@
 #define HLSTATUS_GRACEFUL                  4
 #define HLSTATUS_HSREBALANCE               5
 
-// "flags" field in "CLTOMA_FUSE_OPEN"
+// "flags" fileld in "CLTOMA_FUSE_OPEN"
 #define OPEN_READ                          0x01
 #define OPEN_WRITE                         0x02
 #define OPEN_AFTER_CREATE                  0x04
@@ -600,7 +599,7 @@
 #define OPEN_DIRECTMODE                    0x02
 #define OPEN_APPENDONLY                    0x04
 
-// "flags" field in "CSTOCL_HDD_LIST" (warning !!! - cli/gui uses bits 8+)
+// "flags" fileld in "CSTOCL_HDD_LIST" (warning !!! - cli/gui uses bits 8+)
 #define CS_HDD_MFR                         0x01
 #define CS_HDD_DAMAGED                     0x02
 #define CS_HDD_SCANNING                    0x04
@@ -687,13 +686,13 @@
 #define ATIME_NEVER                        4
 
 
-// current_load.transferringchunks
-#define TRANSFERRING_LOST_CHUNKS            1
-#define TRANSFERRING_NEW_CHUNKS             2
+// current_load.transferingchunks
+#define TRANSFERING_LOST_CHUNKS            1
+#define TRANSFERING_NEW_CHUNKS             2
 
 // chunks matrix in progress (MATOCL_CHUNKS_MATRIX.progress_status)
-#define CHUNKSERVERS_DISCONNECTING         TRANSFERRING_LOST_CHUNKS
-#define CHUNKSERVERS_CONNECTING            TRANSFERRING_NEW_CHUNKS
+#define CHUNKSERVERS_DISCONNECTING         TRANSFERING_LOST_CHUNKS
+#define CHUNKSERVERS_CONNECTING            TRANSFERING_NEW_CHUNKS
 
 // chunk_info.requestedinfo
 #define REQUEST_BLOCKS                     1
@@ -1017,7 +1016,7 @@
 #define CSTOMA_CURRENT_LOAD (PROTO_BASE+103)
 // load:32 - (version < 3.0.7)
 // load:32 hlstatus:8 - (version >= 3.0.7 && version < 4.32.0)
-// load:32 hlstatus:8 transferringchunks:8 - (version >= 4.32.0)
+// load:32 hlstatus:8 transferingchunks:8 - (version >= 4.32.0)
 
 // 0x0068
 // #define MATOCS_STRUCTURE_LOG_ROTATE (PROTO_BASE+104)
@@ -2449,7 +2448,7 @@
 
 // 0x022B
 #define MATOCL_SET_ALL_NODE_ATTRIBUTES (PROTO_BASE+555)
-// msgid:32 status:8
+// msgid:32 statis:8
 
 // CHUNKSERVER STATS
 

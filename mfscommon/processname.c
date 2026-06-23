@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,17 +27,10 @@
 #include <string.h>
 #include <inttypes.h>
 
-#ifndef HAVE_SETPROCTITLE
 static char *argv_start;
 static uint32_t argv_leng;
-static char **myenvcpy;
-#endif
 
 void processname_init(int argc,char *argv[]) {
-#ifdef HAVE_SETPROCTITLE
-	(void)argc;
-	(void)argv;
-#else
 	extern char **environ;
 	char **argp;
 	char *lastpos;
@@ -53,8 +47,6 @@ void processname_init(int argc,char *argv[]) {
 	argp = environ;
 	for (i=0 ; argp[i]!=NULL ; i++) {}
 	environ = malloc((i+1) * sizeof(char*));
-	myenvcpy = environ;
-
 	if (environ==NULL) {
 		environ = argp;
 		return;
@@ -86,7 +78,6 @@ void processname_init(int argc,char *argv[]) {
 
 	argv_start = argv[0];
 	argv_leng = (lastpos - argv_start) - 1;
-#endif
 }
 
 void processname_set(char *name) {
@@ -105,16 +96,6 @@ void processname_set(char *name) {
 //		if (l<argv_leng) { // always true - so ignore this condition
 		memset(argv_start+l,0,argv_leng-l);
 //		}
-	}
-#endif
-}
-
-// DO NOT CALL THIS FUNCTION !!!
-// THIS IS ONLY PROVIDED TO PREVENT STUPID WARNINGS FROM ADDRESS SANITIZER !!!
-void processname_term(void) {
-#ifndef HAVE_SETPROCTITLE
-	if (myenvcpy!=NULL) {
-		free(myenvcpy);
 	}
 #endif
 }

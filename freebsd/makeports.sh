@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # to make ports simply:
 #  - copy distfile "moosefs-*.tar.gz" to /usr/ports/distfiles
@@ -33,14 +33,14 @@ FILEBASEDIR=`dirname "$0"`
 
 PORTNAMES="master chunkserver client metalogger gui cli netdump cgi"
 
-PORTFILES="Makefile pkg-descr pkg-plist files"
+PORTFILES="Makefile pkg-descr pkg-plist distinfo files"
 
-VERSION=4.59.2
+VERSION=4.58.1
 RELEASE=1
 
-cat "${FILEBASEDIR}/files/Makefile.master" | sed "s/^DISTVERSION=.*$/DISTVERSION=		${VERSION}/" | sed "s/^DISTVERSIONSUFFIX=.*$/DISTVERSIONSUFFIX=	-${RELEASE}/" | uniq > .tmp
+cat "${FILEBASEDIR}/files/Makefile.master" | sed "s/^DISTVERSION=.*$/DISTVERSION=		${VERSION}/" | sed "s/^DISTVERSIONSUFFIX=.*$/DISTVERSIONSUFFIX=	${RELEASE}/" | uniq > .tmp
 mv .tmp "${FILEBASEDIR}/files/Makefile.master"
-cat "${FILEBASEDIR}/files/Makefile.cgi" | sed "s/^DISTVERSION=.*$/DISTVERSION=		${VERSION}/" | uniq > .tmp
+cat "${FILEBASEDIR}/files/Makefile.cgi" | sed "s/^PORTVERSION=.*$/PORTVERSION=		${VERSION}/" | sed "s/^PKGNAME=.*$/PKGNAME=		moosefs-cgi-${VERSION}/" | uniq > .tmp
 mv .tmp "${FILEBASEDIR}/files/Makefile.cgi"
 if [ `uname -r | cut -d '.' -f1` -ge 14 ]; then
 	cat "${FILEBASEDIR}/files/Makefile.master" | sed "s/sysutils/filesystems/g" | sed "s/^CATEGORIES=.*$/CATEGORIES=		filesystems sysutils/" > .tmp

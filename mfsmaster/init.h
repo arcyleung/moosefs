@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -37,6 +38,7 @@
 #include "globengine.h"
 #include "bgsaver.h"
 #include "multilan.h"
+#include "overload.h"
 
 #define MODULE_OPTIONS_GETOPT "iax"
 #define MODULE_OPTIONS_SWITCH \
@@ -49,7 +51,7 @@
 	case 'x': \
 		meta_incverboselevel(); \
 		break;
-#define MODULE_OPTIONS_SYNOPSIS "[-i] [-a] [-x [-x]] "
+#define MODULE_OPTIONS_SYNOPIS "[-i] [-a] [-x [-x]] "
 #define MODULE_OPTIONS_DESC "-i : ignore some metadata structure errors (attach orphans to root, ignore names without inode, etc.). DO NOT USE unless you are absoluttely sure that there are no other options to restore your metadata.\n-a : automatically restore metadata from change logs\n-x : produce more verbose output\n-xx : even more verbose output\n"
 
 /* Run Tab */
@@ -69,6 +71,7 @@ struct {
 	{topology_init,"net topology module"},
 	{meta_init,"metadata manager"},
 	{chartsdata_init,"charts module"},
+	{overload_init,"overload / admission control"},
 	{matomlserv_init,"communication with metalogger"},
 	{matocsserv_init,"communication with chunkserver"},
 	{matoclserv_init,"communication with clients"},

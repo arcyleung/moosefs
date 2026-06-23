@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifndef _MFSLOG_H_
@@ -22,14 +23,6 @@
 
 // MFSLOG_xxx are defined here:
 #include "MFSCommunication.h"
-
-#if defined(__printflike)
-#	define PRINTF_LIKE(fmt, args) __printflike(fmt, args)
-#elif defined(__GNUC__) || defined(__clang__)
-#	define PRINTF_LIKE(fmt, args) __attribute__((format(printf, fmt, args)))
-#else
-#	define PRINTF_LIKE(fmt, args)
-#endif
 
 // mode
 // syslog only
@@ -43,11 +36,11 @@
 
 int mfs_log_str_to_pri(const char *pristr);
 
-void mfs_file_log(const char *file,int line,const char *func,int bt,const char *fmt,...) PRINTF_LIKE(5,6);
+void mfs_file_log(const char *file,int line,const char *func,int bt,const char *fmt,...);
 #define mfs_dbg(...) mfs_file_log(__FILE__,__LINE__,__func__,0,__VA_ARGS__)
 #define mfs_dbg_bt(...) mfs_file_log(__FILE__,__LINE__,__func__,1,__VA_ARGS__)
 
-void mfs_log(int mode,int priority,const char *fmt,...) PRINTF_LIKE(3,4);
+void mfs_log(int mode,int priority,const char *fmt,...);
 
 void mfs_log_set_min_level(int minlevel);
 void mfs_log_set_elevate_to(int elevateto);

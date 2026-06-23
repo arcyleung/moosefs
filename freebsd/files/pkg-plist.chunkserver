@@ -10,4 +10,6 @@ man/man8/mfschunkserver.8.gz
 man/man8/mfschunktool.8.gz
 man/man8/mfschunkdbdump.8.gz
 man/man8/mfscsstatsdump.8.gz
-@dir(%%USER%%,%%GROUP%%,) %%MFS_WORKDIR%%/mfs
+@owner mfs
+@group mfs
+@dir %%MFS_WORKDIR%%/mfs

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #include <stdio.h>
@@ -197,51 +198,6 @@ int main(void) {
 
 	mfstest_assert_uint32_eq(crc1,crc2);
 	printf("block 16M ; mycrc32: %.2lfMB/s ; crc32: %.2lfMB/s ; speedup: %.2lf\n",16.0/mycrctime,16.0/refcrctime,refcrctime / mycrctime);
-
-	/* === Dedicated benchmark for the specific CRC functionality in the
-	   data path (plan item: Per-Block Software CRC). ===
-	   Real MooseFS usage is dominated by exactly 64 KiB (MFSBLOCKSIZE)
-	   block CRCs:
-	     - hddspacemgr.c : read_block_from_chunk / write_block_to_chunk
-	     - replicator.c for EC parts
-	     - client readdata.c / writedata.c on receive
-	   This microbenchmark measures realistic per-block cost + throughput
-	   under FS-like access pattern (many independent 64 KiB blocks).
-	   It is the official "create a benchmark" for this performance
-	   refactor. Results are printed for CI/perf tracking. */
-	printf("\nFS data-path block CRC workload (64 KiB MFSBLOCKSIZE blocks)\n");
-
-	/* Dispatch status (prepared for HW accel in crc.c via mycrc32_impl).
-	   For this checkpoint we use the proven slice tables (bit-identical
-	   to reference in all cases). */
-	printf("accelerated impl registered: no (using slice tables; dispatch ready)\n");
-
-#define FS_BLOCK_SIZE 65536
-#define FS_BLOCK_ITER  4096   /* ~256 MiB total; enough for stable timing */
-
-	st = monotonic_seconds();
-	for (uint32_t i = 0; i < FS_BLOCK_ITER; i++) {
-		/* typical starting crc for a fresh block in FS code paths */
-		(void)mycrc32(0, rblock, FS_BLOCK_SIZE);
-	}
-	en = monotonic_seconds();
-	double t_blocks = (en - st) - corr;
-	double mbs = (FS_BLOCK_ITER * (FS_BLOCK_SIZE / 1048576.0)) / t_blocks;
-	double blocks_per_sec = FS_BLOCK_ITER / t_blocks;
-	printf("  %u x %u-byte blocks: %.2lf MB/s  (%.0lf blocks/sec)\n",
-	       FS_BLOCK_ITER, FS_BLOCK_SIZE, mbs, blocks_per_sec);
-
-	/* Also a mixed-starting-crc variant that appears in partial + combine paths */
-	st = monotonic_seconds();
-	for (uint32_t i = 0; i < FS_BLOCK_ITER; i++) {
-		(void)mycrc32(0xFFFFFFFFU, rblock, FS_BLOCK_SIZE);
-	}
-	en = monotonic_seconds();
-	t_blocks = (en - st) - corr;
-	mbs = (FS_BLOCK_ITER * (FS_BLOCK_SIZE / 1048576.0)) / t_blocks;
-	blocks_per_sec = FS_BLOCK_ITER / t_blocks;
-	printf("  (starting ~0) %u x %u-byte blocks: %.2lf MB/s  (%.0lf blocks/sec)\n",
-	       FS_BLOCK_ITER, FS_BLOCK_SIZE, mbs, blocks_per_sec);
 
 	mfstest_end();
 	mfstest_return();

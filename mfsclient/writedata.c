@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -87,7 +88,7 @@
 #endif
 
 // for Nagle's-like algorithm
-#define NEXT_BLOCK_DELAY 0.02  /* perf: slightly more aggressive coalescing for small writes while still batching (trade-off tuned for throughput) */
+#define NEXT_BLOCK_DELAY 0.05
 
 #define CHUNKSERVER_ACTIVITY_TIMEOUT 5.0
 
@@ -99,11 +100,11 @@
 
 #define WORKER_NOP_INTERVAL 1.0
 
-#define MAX_SIM_CHUNKS 32  /* perf: increased concurrent in-flight chunks per inode for large-file writes on fast backends */
+#define MAX_SIM_CHUNKS 16
 
-#define SUSTAIN_WORKERS 64   /* perf: raised sustain for better baseline parallelism on multi-core clients (matches readdata) */
-#define HEAVYLOAD_WORKERS 200  /* perf: allow more workers under heavy write load */
-#define MAX_WORKERS 320        /* perf: higher ceiling for very wide concurrent write workloads */
+#define SUSTAIN_WORKERS 50
+#define HEAVYLOAD_WORKERS 150
+#define MAX_WORKERS 250
 
 #define WCHASHSIZE 256
 #define WCHASH(inode,indx) (((inode)*0xB239FB71+(indx)*193)%WCHASHSIZE)
@@ -808,7 +809,7 @@ void* write_worker(void *arg) {
 // MFS_ERROR_ENOENT - internal error (wrong inode - can't be repaired)
 // MFS_ERROR_EPERM - internal error (wrong inode - can't be repaired)
 // MFS_ERROR_INDEXTOOBIG - requested file position is too big
-// MFS_ERROR_CHUNKLOST - according to master chunk is definitely lost (all chunkservers are connected and chunk is not there)
+// MFS_ERROR_CHUNKLOST - according to master chunk is definitelly lost (all chunkservers are connected and chunk is not there)
 // MFS_ERROR_QUOTA - disk quota exceeded (quit immediately - no retry)
 // MFS_ERROR_NOSPACE - no space on disk
 // MFS_ERROR_IO (for future use)

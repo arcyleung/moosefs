@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #include <string.h>
@@ -207,7 +208,7 @@ static void* masterproxy_server(void *args) {
 			put32bit(&wptr,asize+4);
 			put32bit(&wptr,msgid);
 
-			// stupid active wait - should be replaced by cond, but since it is highly improbable we can leave it
+			// stupid active wait - shuld be replaced by cond, but since it is highly improbable we can leave it
 			pthread_mutex_lock(&(cd->lock));
 			while (cd->sendnops==2) { // we don't want to send answer when nop packet is being sent
 				pthread_mutex_unlock(&(cd->lock));

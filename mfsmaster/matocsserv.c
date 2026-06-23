@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -1261,7 +1262,7 @@ uint16_t matocsserv_getservers_replpossible(uint16_t csids[MAXCSCOUNT]) {
 			if (eptr->totalspace==0 || (eptr->totalspace - eptr->usedspace)<=(eptr->totalspace/100)) {
 				// no space - replication not possible
 				replpossible = 0;
-			} else if (eptr->registered!=REGISTERED || (eptr->receivingchunks&TRANSFERRING_NEW_CHUNKS)!=0) {
+			} else if (eptr->registered!=REGISTERED || (eptr->receivingchunks&TRANSFERING_NEW_CHUNKS)!=0) {
 				// currently busy, but potentially replication is possible - can wait
 				replpossible = 1;
 			} else if (!((eptr->hlstatus==HLSTATUS_DEFAULT || eptr->hlstatus==HLSTATUS_OK || eptr->hlstatus==HLSTATUS_LSREBALANCE) && csdb_server_is_being_maintained(eptr->csptr)==0)) {
@@ -1300,7 +1301,7 @@ void matocsserv_get_server_groups(uint16_t csids[MAXCSCOUNT],double replimit,uin
 				a = ((uint32_t)(eptr->csid*UINT32_C(0x9874BF31)+now*UINT32_C(0xB489FC37)))/4294967296.0;
 				if (eptr->totalspace==0 || (eptr->totalspace - eptr->usedspace)<=(eptr->totalspace/100)) {
 					csstate=CSSTATE_NO_SPACE;
-				} else if (eptr->wrepcounter/(double)(FULL_REPLICATION_WEIGHT)+a>=replimit || eptr->registered!=REGISTERED || (eptr->receivingchunks&TRANSFERRING_NEW_CHUNKS)!=0) {
+				} else if (eptr->wrepcounter/(double)(FULL_REPLICATION_WEIGHT)+a>=replimit || eptr->registered!=REGISTERED || (eptr->receivingchunks&TRANSFERING_NEW_CHUNKS)!=0) {
 					csstate=CSSTATE_LIMIT_REACHED;
 				} else if (!((eptr->hlstatus==HLSTATUS_DEFAULT || eptr->hlstatus==HLSTATUS_OK || eptr->hlstatus==HLSTATUS_LSREBALANCE) && csdb_server_is_being_maintained(eptr->csptr)==0)) {
 					csstate=CSSTATE_OVERLOADED;
@@ -1351,7 +1352,7 @@ void matocsserv_get_server_groups(uint16_t csids[MAXCSCOUNT],double replimit,uin
 }
 
 static inline uint8_t matocsserv_server_can_be_used_in_replication(matocsserventry *eptr) {
-	if (eptr->mode!=KILL && eptr->totalspace>0 && eptr->usedspace<=eptr->totalspace && (eptr->totalspace - eptr->usedspace)>(eptr->totalspace/100) && eptr->csptr!=NULL && eptr->registered==REGISTERED && (eptr->receivingchunks&TRANSFERRING_NEW_CHUNKS)==0) {
+	if (eptr->mode!=KILL && eptr->totalspace>0 && eptr->usedspace<=eptr->totalspace && (eptr->totalspace - eptr->usedspace)>(eptr->totalspace/100) && eptr->csptr!=NULL && eptr->registered==REGISTERED && (eptr->receivingchunks&TRANSFERING_NEW_CHUNKS)==0) {
 		if ((eptr->hlstatus==HLSTATUS_DEFAULT || eptr->hlstatus==HLSTATUS_OK || eptr->hlstatus==HLSTATUS_LSREBALANCE) && csdb_server_is_being_maintained(eptr->csptr)==0) {
 			return 2;
 		} else {
@@ -1764,7 +1765,7 @@ double matocsserv_replication_write_counter(void *e,uint32_t now) {
 	matocsserventry *eptr = (matocsserventry *)e;
 	double a;
 
-	if (eptr->mode!=KILL && eptr->totalspace>0 && eptr->usedspace<=eptr->totalspace && (eptr->totalspace - eptr->usedspace)>(eptr->totalspace/100) && eptr->csptr!=NULL && eptr->registered==REGISTERED && (eptr->receivingchunks&TRANSFERRING_NEW_CHUNKS)==0) {
+	if (eptr->mode!=KILL && eptr->totalspace>0 && eptr->usedspace<=eptr->totalspace && (eptr->totalspace - eptr->usedspace)>(eptr->totalspace/100) && eptr->csptr!=NULL && eptr->registered==REGISTERED && (eptr->receivingchunks&TRANSFERING_NEW_CHUNKS)==0) {
 		a = ((uint32_t)(eptr->csid*UINT32_C(0x9874BF31)+now*UINT32_C(0xB489FC37)))/4294967296.0;
 		return eptr->wrepcounter/(double)(FULL_REPLICATION_WEIGHT)+a;
 	} else {
@@ -1775,7 +1776,7 @@ double matocsserv_replication_write_counter(void *e,uint32_t now) {
 double matocsserv_replication_read_counter(void *e,uint32_t now) {
 	matocsserventry *eptr = (matocsserventry *)e;
 	double a;
-	if (eptr->mode!=KILL && eptr->csptr!=NULL && (eptr->receivingchunks&TRANSFERRING_LOST_CHUNKS)==0) {
+	if (eptr->mode!=KILL && eptr->csptr!=NULL && (eptr->receivingchunks&TRANSFERING_LOST_CHUNKS)==0) {
 		a = ((uint32_t)(eptr->csid*UINT32_C(0x9874BF31)+now*UINT32_C(0xB489FC37)))/4294967296.0;
 		return eptr->rrepcounter/(double)(FULL_REPLICATION_WEIGHT)+a;
 	} else {
@@ -1854,7 +1855,7 @@ void matocsserv_broadcast_chunk_status(uint64_t chunkid) {
 
 	if (ChunkServerCheck>0) {
 		for (eptr = matocsservhead ; eptr ; eptr=eptr->next) {
-			if (eptr->mode==DATA && eptr->version>=VERSION2INT(4,32,0) && eptr->registered && (eptr->receivingchunks&(TRANSFERRING_LOST_CHUNKS|TRANSFERRING_NEW_CHUNKS))==0) {
+			if (eptr->mode==DATA && eptr->version>=VERSION2INT(4,32,0) && eptr->registered && (eptr->receivingchunks&(TRANSFERING_LOST_CHUNKS|TRANSFERING_NEW_CHUNKS))==0) {
 				data = matocsserv_create_packet(eptr,MATOCS_CHUNK_STATUS,8);
 				put64bit(&data,chunkid);
 //				matocsserv_chunk_status_add(eptr,chunkid);
@@ -1880,7 +1881,7 @@ void matocsserv_got_chunk_status(matocsserventry *eptr,const uint8_t *data,uint3
 //	if (matocsserv_chunk_status_check(eptr,chunkid)==0) {
 //		return;
 //	}
-	if ((eptr->receivingchunks&(TRANSFERRING_LOST_CHUNKS|TRANSFERRING_NEW_CHUNKS))!=0 || eptr->registered==0 || ChunkServerCheck==0) {
+	if ((eptr->receivingchunks&(TRANSFERING_LOST_CHUNKS|TRANSFERING_NEW_CHUNKS))!=0 || eptr->registered==0 || ChunkServerCheck==0) {
 		return;
 	}
 	length-=8;
@@ -2458,15 +2459,7 @@ void matocsserv_get_config(matocsserventry *eptr,const uint8_t *data,uint32_t le
 	}
 	memcpy(name,data,nleng);
 	name[nleng] = 0;
-	if (strcmp(name,"AUTH_CODE")==0) {
-		if (cfg_isdefined(name)) {
-			val = strdup("[DEFINED]");
-		} else {
-			val = NULL;
-		}
-	} else {
-		val = cfg_getdefaultstr(name);
-	}
+	val = cfg_getdefaultstr(name);
 	if (val!=NULL) {
 		vleng = strlen(val);
 		if (vleng>255) {
@@ -2517,11 +2510,7 @@ void matocsserv_get_config_file(matocsserventry *eptr,const uint8_t *data,uint32
 	}
 	memcpy(name,data,nleng);
 	name[nleng] = 0;
-	if (strcmp(name,"LICENCE_FILENAME")==0) {
-		fdata = cfg_getdefaultfile(name,65535);
-	} else {
-		fdata = NULL;
-	}
+	fdata = cfg_getdefaultfile(name,65535);
 	if (fdata==NULL) {
 		ptr = matocsserv_create_packet(eptr,ANTOAN_CONFIG_FILE_CONTENT,5);
 		put32bit(&ptr,msgid);
@@ -2539,7 +2528,7 @@ void matocsserv_syslog(matocsserventry *eptr,const uint8_t *data,uint32_t length
 	uint8_t priority;
 	uint32_t timestamp;
 	uint16_t msgsize;
-	if (length<7) {
+	if (length<3) {
 		mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"ANTOMA_SYSLOG - wrong size (%"PRIu32"/>=7)",length);
 		eptr->mode = KILL;
 		return;
@@ -2547,7 +2536,7 @@ void matocsserv_syslog(matocsserventry *eptr,const uint8_t *data,uint32_t length
 	priority = get8bit(&data);
 	timestamp = get32bit(&data);
 	msgsize = get16bit(&data);
-	if (length!=7U+msgsize) {
+	if (length!=3U+msgsize) {
 		mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"ANTOMA_SYSLOG - wrong size (%"PRIu32"/7+msgsize(%"PRIu16"))",length,msgsize);
 		eptr->mode = KILL;
 		return;
@@ -2693,8 +2682,8 @@ void matocsserv_register(matocsserventry *eptr,const uint8_t *data,uint32_t leng
 				return;
 			}
 			eptr->newchunkdelay = NEWCHUNKDELAY;
-			eptr->receivingchunks |= TRANSFERRING_NEW_CHUNKS;
-			receivingchunks |= TRANSFERRING_NEW_CHUNKS;
+			eptr->receivingchunks |= TRANSFERING_NEW_CHUNKS;
+			receivingchunks |= TRANSFERING_NEW_CHUNKS;
 			chunkcount = (length-1)/12;
 			for (i=0 ; i<chunkcount ; i++) {
 				GET_CHUNKID_AND_ECID(&data,chunkid,ecid);
@@ -2863,13 +2852,13 @@ void matocsserv_chunks_delays(void) {
 				eptr->receivingchunks = 0;
 				if (eptr->lostchunkdelay>0) {
 					eptr->lostchunkdelay--;
-					eptr->receivingchunks |= TRANSFERRING_LOST_CHUNKS;
-					receivingchunks |= TRANSFERRING_LOST_CHUNKS;
+					eptr->receivingchunks |= TRANSFERING_LOST_CHUNKS;
+					receivingchunks |= TRANSFERING_LOST_CHUNKS;
 				}
 				if (eptr->newchunkdelay>0) {
 					eptr->newchunkdelay--;
-					eptr->receivingchunks |= TRANSFERRING_NEW_CHUNKS;
-					receivingchunks |= TRANSFERRING_NEW_CHUNKS;
+					eptr->receivingchunks |= TRANSFERING_NEW_CHUNKS;
+					receivingchunks |= TRANSFERING_NEW_CHUNKS;
 				}
 			} else {
 				receivingchunks |= eptr->receivingchunks;
@@ -2916,8 +2905,8 @@ void matocsserv_chunks_lost(matocsserventry *eptr,const uint8_t *data,uint32_t l
 //		matocsserv_chunk_status_cleanup(eptr);
 //	}
 	eptr->lostchunkdelay = LOSTCHUNKDELAY;
-	eptr->receivingchunks |= TRANSFERRING_LOST_CHUNKS;
-	receivingchunks |= TRANSFERRING_LOST_CHUNKS;
+	eptr->receivingchunks |= TRANSFERING_LOST_CHUNKS;
+	receivingchunks |= TRANSFERING_LOST_CHUNKS;
 	for (i=0 ; i<length/8 ; i++) {
 		GET_CHUNKID_AND_ECID(&data,chunkid,ecid);
 //		mfs_log(MFSLOG_SYSLOG,MFSLOG_DEBUG,"(%s) chunk lost: %016"PRIX64,eptr->servdesc,chunkid);
@@ -2943,8 +2932,8 @@ void matocsserv_chunks_new(matocsserventry *eptr,const uint8_t *data,uint32_t le
 //		matocsserv_chunk_status_cleanup(eptr);
 //	}
 	eptr->newchunkdelay = NEWCHUNKDELAY;
-	eptr->receivingchunks |= TRANSFERRING_NEW_CHUNKS;
-	receivingchunks |= TRANSFERRING_NEW_CHUNKS;
+	eptr->receivingchunks |= TRANSFERING_NEW_CHUNKS;
+	receivingchunks |= TRANSFERING_NEW_CHUNKS;
 	for (i=0 ; i<length/12 ; i++) {
 		GET_CHUNKID_AND_ECID(&data,chunkid,ecid);
 		chunkversion = get32bit(&data);
@@ -3057,9 +3046,9 @@ void matocsserv_gotpacket(matocsserventry *eptr,uint32_t type,const uint8_t *dat
 		case ANTOAN_GET_CONFIG:
 			matocsserv_get_config(eptr,data,length);
 			break;
-//		case ANTOAN_GET_CONFIG_FILE:
-//			matocsserv_get_config_file(eptr,data,length);
-//			break;
+		case ANTOAN_GET_CONFIG_FILE:
+			matocsserv_get_config_file(eptr,data,length);
+			break;
 		case ANTOMA_SYSLOG:
 			matocsserv_syslog(eptr,data,length);
 			break;
@@ -3505,7 +3494,7 @@ void matocsserv_serve(struct pollfd *pdesc) {
 
 			eptr->lostchunkdelay = LOSTCHUNKDELAY;
 			eptr->newchunkdelay = NEWCHUNKDELAY;
-			eptr->receivingchunks = (TRANSFERRING_NEW_CHUNKS|TRANSFERRING_LOST_CHUNKS);
+			eptr->receivingchunks = (TRANSFERING_NEW_CHUNKS|TRANSFERING_LOST_CHUNKS);
 
 			memset(eptr->passwordrnd,0,32);
 
@@ -3885,11 +3874,12 @@ int matocsserv_init(void) {
 
 	matocsserv_replication_init();
 	matocsservhead = NULL;
-	receivingchunks = (TRANSFERRING_NEW_CHUNKS|TRANSFERRING_LOST_CHUNKS);
+	receivingchunks = (TRANSFERING_NEW_CHUNKS|TRANSFERING_LOST_CHUNKS);
 
 	main_reload_register(matocsserv_reload);
 	main_destruct_register(matocsserv_term);
-	main_poll_register(matocsserv_desc,matocsserv_serve);
+	/* prio 10: chunkserver control plane before clients (prio 50) */
+	main_poll_register_prio(matocsserv_desc,matocsserv_serve,10);
 	main_keepalive_register(matocsserv_keep_alive);
 	main_info_register(matocsserv_log_extra_info);
 	main_time_register(1,0,matocsserv_hlstatus_fix);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -191,6 +192,7 @@ static kaentry *kahead=NULL;
 typedef struct pollentry {
 	void (*desc)(struct pollfd *,uint32_t *);
 	void (*serve)(struct pollfd *);
+	int prio; /* lower = higher priority when registered via main_poll_register_prio */
 	char *dname;
 	char *sname;
 	struct pollentry *next;
@@ -306,29 +308,37 @@ void main_keepalive_register_fname (void (*fun)(void),const char *fname) {
 }
 
 void main_poll_register_fname (void (*desc)(struct pollfd *,uint32_t *),void (*serve)(struct pollfd *),const char *dname,const char *sname) {
+	/* Default: prepend (preserves historical serve order for non-master binaries). */
 	pollentry *aux=(pollentry*)malloc(sizeof(pollentry));
 	passert(aux);
 	aux->desc = desc;
 	aux->serve = serve;
+	aux->prio = 100; /* default priority (lower = earlier serve when using prio API) */
 	aux->dname = strdup(dname);
 	aux->sname = strdup(sname);
 	aux->next = pollhead;
 	pollhead = aux;
 }
 
-/* Performance prep for networking layer (plan item poll->epoll).
-   The current design builds a pollfd array every cycle via the registered
-   xxx_desc() callbacks from matoclserv/matomlserv/mainserv etc, then calls
-   poll(). This is O(N) in the number of fds for both building and waiting.
-   For high client counts this is the scalability limit mentioned in the plan.
-   Next step: switch the wait to epoll_wait (edge triggered) while keeping the
-   desc/serve callbacks (or translate pdesc<->epoll events). The code below
-   reserves the epoll fd; actual switch of the wait can be done without
-   touching every *serv.c . */
-#ifdef __linux__
-#include <sys/epoll.h>
-static int epollfd = -1;
-#endif
+void main_poll_register_prio_fname (void (*desc)(struct pollfd *,uint32_t *),void (*serve)(struct pollfd *),int prio,const char *dname,const char *sname) {
+	/* Insert sorted by ascending priority (0 = highest priority / first served).
+	 * Master uses this so chunkserver/metalogger/bgsaver run before client under load. */
+	pollentry *aux=(pollentry*)malloc(sizeof(pollentry));
+	pollentry **pp;
+	passert(aux);
+	aux->desc = desc;
+	aux->serve = serve;
+	aux->prio = prio;
+	aux->dname = strdup(dname);
+	aux->sname = strdup(sname);
+	aux->next = NULL;
+	pp = &pollhead;
+	while (*pp != NULL && (*pp)->prio <= prio) {
+		pp = &((*pp)->next);
+	}
+	aux->next = *pp;
+	*pp = aux;
+}
 
 void main_eachloop_register_fname (void (*fun)(void),const char *fname) {
 	eloopentry *aux=(eloopentry*)malloc(sizeof(eloopentry));
@@ -1115,12 +1125,6 @@ void changeugid(void) {
 		} else {
 			mfs_log(MFSLOG_SYSLOG,MFSLOG_INFO,"set gid to %d",(int)wrk_gid);
 		}
-		if (setgroups(0, NULL)<0) {
-			mfs_log(MFSLOG_ERRNO_SYSLOG_STDERR,MFSLOG_ERR,"can't clear auxiliary groups");
-			exit(1);
-		} else {
-			mfs_log(MFSLOG_SYSLOG,MFSLOG_INFO,"cleared auxiliary groups");
-		}
 		if (setuid(wrk_uid)<0) {
 			mfs_log(MFSLOG_ERRNO_SYSLOG_STDERR,MFSLOG_ERR,"can't set uid to %d",(int)wrk_uid);
 			exit(1);
@@ -1404,7 +1408,7 @@ void createpath(const char *filename) {
 
 void usage(const char *appname) {
 	printf(
-"usage: %s [-vhfdun] [-t locktimeout] [-c cfgfile] " MODULE_OPTIONS_SYNOPSIS "[start|stop|restart|reload|info|test|kill|restore]\n"
+"usage: %s [-vhfdun] [-t locktimeout] [-c cfgfile] " MODULE_OPTIONS_SYNOPIS "[start|stop|restart|reload|info|test|kill|restore]\n"
 "\n"
 "-v : print version number and exit\n"
 "-h : print this info and exit\n"

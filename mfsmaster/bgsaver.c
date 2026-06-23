@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -1152,6 +1153,7 @@ int bgsaver_init(void) {
 	main_canexit_register(bgsaver_canexit);
 	main_reload_register(bgsaver_reload);
 	main_destruct_register(bgsaver_term);
-	main_poll_register(bgsaver_desc,bgsaver_serve);
+	/* prio 20: bgsaver before clients, after CS/ML */
+	main_poll_register_prio(bgsaver_desc,bgsaver_serve,20);
 	return 0;
 }

@@ -50,6 +50,8 @@ mfsmaster_SOURCES = \
 	bgsaver.c bgsaver.h \
 	csipmap.c csipmap.h \
 	multilan.c multilan.h \
+	reqclass.c reqclass.h \
+	overload.c overload.h \
 	chartsdefs.h \
 	init.h \
 	../mfscommon/main.c ../mfscommon/main.h \

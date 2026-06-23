@@ -1,4 +1,4 @@
-.TH mfsmaster.cfg "5" "May 2026" "MooseFS 4.59.2-1" "This is part of MooseFS"
+.TH mfsmaster.cfg "5" "October 2025" "MooseFS 4.58.1-1" "This is part of MooseFS"
 .ss 12 0
 .SH NAME
 mfsmaster.cfg \- main configuration file for \fBmfsmaster\fP
@@ -88,7 +88,7 @@ this sets the minimum, actual number may be a bit bigger due to logs being kept
 in 5k blocks; zero disables extra logs storage)
 .TP
 .B CHANGELOG_PRESERVE_MB
-how much RAM can be used to preserve change logs in memory in megabytes (default is 500; this sets the minimum, actual number may be a bit bigger 
+how much RAM can be used to preserve change logs in memory in megabytes (deafult is 500; this sets the minimum, actual number may be a bit bigger 
 due to logs being kept in 5k blocks; zero disables extra logs storage);
 master will always preserve the lower number of 5k blocks defined by \fBCHANGELOG_PRESERVE_SECONDS\fP and \fBCHANGELOG_PRESERVE_MB\fP, so be sure to set both appropriately
 .TP
@@ -122,10 +122,10 @@ IP address to listen on for metalogger, (pro only) masters and supervisors conne
 port to listen on for metalogger, (pro only) masters and supervisors connections
 .TP
 .B MATOML_TIMEOUT
-default timeout in seconds for master-metalogger connection (default is 10)
+default timeout in seconds for master-metalogger (or master follower, pro only) connection (default is 10)
 .TP
 .B MATOML_FORCE_TIMEOUT
-forced timeout in seconds for master-metalogger connection (default is 0 - do not force timeouts)
+forced timeout in seconds for master-metalogger (or master follower, pro only) connection (default is 0 - do not force timeouts)
 .SS MASTER-LEADER CONNECTION OPTIONS
 Changes in this section require only process reload.
 .TP
@@ -135,7 +135,7 @@ Changes in this section require only process reload.
 .B MASTER_RECONNECTION_DELAY
 (pro only) delay in seconds before next try to reconnect to master-leader if not connected (default is 5)
 .TP
-.B MATOMA_TIMEOUT
+.B MASTER_TIMEOUT
 (pro only) timeout in seconds for master-leader connections (default is 10)
 .TP
 .B BIND_HOST
@@ -200,8 +200,8 @@ avoid using same ip/rack for different chunk copies (default is 0)
 .br
 \fbNOTICE!\fP This parameter is available for backward compatibility purposes and should not be set 
 to a value other than 0. Instead, distinguish feature from storage classes should be used. 
-However, if it is set to a value other than 0, it will override any distinguish definition in 
-storage classes. For more information about storage classes and distinguish feature refer to
+However, if it is set to a value other than 0, it will override any distinguish definintion in 
+storage classes. For more informations about storage classes and distinguish feature refer to
 \fBmfsscadmin\fP\|(1) manual.
 .TP
 .B CHUNKS_LOOP_MAX_CPS
@@ -299,7 +299,7 @@ For config variables that define time without requiring a single, specific unit,
 .PP
 first format: #.#T where T is one of: s-seconds, m-minutes, h-hours, d-days or w-weeks; fractions of seconds will be rounded to full seconds
 .PP
-second format: #w#d#h#m#s, any number of definitions can be omitted, but the remaining definitions must be in order (so #d#m is still a valid definition, but #m#d is not); ranges: s,m: 0 to 59, h: 0 to 23, d: 0 t
+second format: #w#d#h#m#s, any number of definitions can be ommited, but the remaining definitions must be in order (so #d#m is still a valid definition, but #m#d is not); ranges: s,m: 0 to 59, h: 0 to 23, d: 0 t
 o 6, w is unlimited and the first definition is also always unlimited (i.e. for #d#h#m d will be unlimited)
 .PP
 Examples:
@@ -376,7 +376,7 @@ Each time a client connects, the master will check whether the connection came f
 Proper DNS configuration is also required: clients in each LAN must either get different IP when querying DNS about master host or must use different master host names that are resolved to IPs in their class.
 See \fBmfsmount\fP\|(8), \fBmfsbdev\fP\|(8) for more info about master host name.
 .PP
-The two above sets of options can be used together. One purpose would be to create a separate network for replication of data between chunkservers while also maintaining several separate networks (LANs) for separate sets of clients.
+The two above sets of options can be used together. One purpose would be to create a separate network for replication of data between chunkservers while also maintaning several separate networks (LANs) for separate sets of clients.
 For example, with the following configuration:
 .PP
 REMAP_BITS = 24
@@ -475,7 +475,7 @@ The \fBKEEP_LEADERSHIP\fP option can be used to select one master in a Pro insta
 .PP
 Setting \fBKEEP_LEADERSHIP\fP option to 1 for more than one master server in a cluster is NOT recommended and may lead to unexpected behaviour.
 .SH COPYRIGHT
-Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 
 This file is part of MooseFS.
 
@@ -489,8 +489,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, see
-<https://www.gnu.org/licenses/>.
+along with MooseFS; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+or visit http://www.gnu.org/licenses/gpl-2.0.html
 .SH "SEE ALSO"
 .BR mfsmaster (8),
 .BR mfsexports.cfg (5)

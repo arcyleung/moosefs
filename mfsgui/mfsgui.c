@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -460,9 +461,9 @@ void mfscgiserv_rescan(void) {
 			}
 		} else {
 			if (req_head) {
-				mfs_log(MFSLOG_ERRNO_SYSLOG,MFSLOG_WARNING,"guiserv: can't open mfsgui requests file (%s) - requests not changed, error",RequestsFile);
+				mfs_log(MFSLOG_ERRNO_SYSLOG,MFSLOG_WARNING,"guiserv: can't open mfsgui requests file (%s) - reqests not changed, error",RequestsFile);
 			} else {
-				mfs_log(MFSLOG_ERRNO_SYSLOG_STDERR,MFSLOG_WARNING,"guiserv: can't open mfsgui requests file (%s) - no requests !!!, error",RequestsFile);
+				mfs_log(MFSLOG_ERRNO_SYSLOG_STDERR,MFSLOG_WARNING,"guiserv: can't open mfsgui reqests file (%s) - no requests !!!, error",RequestsFile);
 			}
 		}
 		return;
@@ -485,7 +486,7 @@ void mfscgiserv_rescan(void) {
 	}
 	fclose(fd);
 	free(linebuff);
-	mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_NOTICE,"guiserv: requests have been reloaded");
+	mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_NOTICE,"guiserv: requests have beed reloaded");
 }
 
 void mfscgiserv_quick_rescan(void) {

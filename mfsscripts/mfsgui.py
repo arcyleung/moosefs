@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+# Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 #
 # This file is part of MooseFS.
 #
@@ -14,8 +14,9 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, see
-# <https://www.gnu.org/licenses/>.
+# along with MooseFS; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+# or visit http://www.gnu.org/licenses/gpl-2.0.html
 
 import sys
 
@@ -96,7 +97,7 @@ if len(mastername)>0: html_title += " (%s)" % htmlentities(mastername)
 
 errmsg = None
 if cl.master()==None:
-	errmsg = cl.errormsg()
+	errmsg = """Can't connect to the MooseFS Master server (%s)""" % (masterhost)
 if (cl.leaderfound() or cl.electfound() or cl.usurperfound() or cl.followerfound()):
 	if cl.master().version_unknown():
 		errmsg = """Can't detect the MooseFS Master server version (%s)""" % (masterhost)
@@ -109,7 +110,7 @@ if errmsg:
 	print("""<head>""")
 	print("""<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />""")
 	print("""<title>MooseFS GUI %s</title>""" % (htmlentities(mastername)))
-	# leave this script a the beginning to prevent screen blinking when using dark mode
+	# leave this script a the begining to prevent screen blinking when using dark mode
 	print("""<script type="text/javascript"><!--//--><![CDATA[//><!--
 		if (localStorage.getItem('theme')===null || localStorage.getItem('theme')==='dark') { document.documentElement.setAttribute('data-theme', 'dark');}
 		//--><!]]></script>""")
@@ -117,8 +118,6 @@ if errmsg:
 	print("""</head>""")
 	print("""<body>""")
 	print("""<h1 class="center">%s</h1>""" % htmlentities(errmsg))
-	vstr = VERSION
-	print("""<h4 class="center">GUI&nbsp;v.%s&nbsp;&nbsp;Python v.%u.%u</h4>""" % (vstr, sys.version_info[0], sys.version_info[1]))
 	print("""</body>""")
 	print("""</html>""")
 	sys.exit(1)
@@ -336,22 +335,7 @@ if org.shall_render("QU"):
 # Treemap
 if org.shall_render("TM"):
 	try:
-		# Inline the treemap JS so it works even when static assets (/assets/treemap.js)
-		# are not served (e.g. running the python mfs.cgi directly without a frontend web server).
-		# This makes the treemap self-contained for the section.
-		try:
-			import os
-			script_dir = os.path.dirname(os.path.abspath(__file__))
-			js_path = os.path.join(script_dir, 'assets', 'treemap.js')
-			with open(js_path, 'r') as f:
-				treemap_js_content = f.read()
-			print('<script type="text/javascript">')
-			print(treemap_js_content)
-			print('</script>')
-		except Exception:
-			# Fallback to external src if inlining fails (e.g. file not present)
-			print("""<script src="/assets/treemap.js" type="text/javascript"></script>""")
-
+		print("""<script src="assets/treemap.js" type="text/javascript"></script>""")
 		import views.files_treemap
 		print_out(views.files_treemap.render(dataprovider, fields, vld))
 	except Exception:

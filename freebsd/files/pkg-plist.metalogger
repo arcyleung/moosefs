@@ -2,4 +2,6 @@
 sbin/mfsmetalogger
 man/man5/mfsmetalogger.cfg.5.gz
 man/man8/mfsmetalogger.8.gz
-@dir(%%USER%%,%%GROUP%%,) %%MFS_WORKDIR%%/mfs
+@owner mfs
+@group mfs
+@dir %%MFS_WORKDIR%%/mfs

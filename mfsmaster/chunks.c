@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #define BUCKETS_MMAP_ALLOC 1
@@ -746,7 +747,7 @@ typedef struct _io_ready_chunk {
 
 static io_ready_chunk* io_ready_chunk_hash[256];
 
-static uint32_t JobsTimerMilliSeconds;
+static uint32_t JobsTimerMiliSeconds;
 static uint32_t TicksPerSecond;
 static uint32_t MaxFailsPerClass;
 static uint32_t FailClassCounterResetCalls;
@@ -983,7 +984,7 @@ int32_t* do_advanced_match(const storagemode *sm,uint32_t servcnt,const uint16_t
 							}
 						}
 					}
-				} else if (imatching[x] >= 0) { // R to L - use existing connection
+				} else if (imatching[x] >= 0) { // R to L - use exisitng connection
 					augment[imatching[x]] = x;
 					visited[imatching[x]] = 1;
 					QUEUE_INSERT(imatching[x]); // q.push
@@ -1641,7 +1642,7 @@ void chunk_chart_data(uint64_t *copychunks,uint64_t *ec8chunks,uint64_t *ec4chun
 
 uint8_t chunk_counters_in_progress(void) {
 //	mfs_log(MFSLOG_SYSLOG,MFSLOG_DEBUG,"discservers: %p , discservers_next: %p , csregisterinprogress: %"PRIu16,discservers,discservers_next,csregisterinprogress);
-	return ((discservers!=NULL || discservers_next!=NULL)?CHUNKSERVERS_DISCONNECTING:0)|((csregisterinprogress>0)?CHUNKSERVERS_CONNECTING:0)|(matocsserv_receiving_chunks_state()&(TRANSFERRING_LOST_CHUNKS|TRANSFERRING_NEW_CHUNKS));
+	return ((discservers!=NULL || discservers_next!=NULL)?CHUNKSERVERS_DISCONNECTING:0)|((csregisterinprogress>0)?CHUNKSERVERS_CONNECTING:0)|(matocsserv_receiving_chunks_state()&(TRANSFERING_LOST_CHUNKS|TRANSFERING_NEW_CHUNKS));
 }
 
 void chunk_store_chunkcounters(uint8_t *buff,uint8_t matrixid,int16_t classid) {
@@ -1984,7 +1985,7 @@ static inline uint8_t chunk_get_labels_mode_for_ec(storagemode *sm,uint8_t sclas
 // DEFAULT + EC + 1 label
 //	VA < N+X -> KEEP
 //	RLA >= N+X -> ec_strict_mode = 1
-// DEFAULT + EC + 2 labels
+// DEFUALT + EC + 2 labels
 //	VA < N+X -> KEEP
 //	RLA >= N+X && RLD+RLB >= N && RLC+RLB >= X -> ec_strict_mode = 1
 // STRICT + copy + 1 label
@@ -3059,7 +3060,7 @@ static inline int chunk_add_file_int(chunk *c,uint8_t sclassid) {
 			fl = flist_get(findx = flist_alloc());
 			fl->nexti = c->fhead;
 			c->fhead = findx;
-/* code that adds new element at the end - not used - see comments in 'chunk_change_file'
+/* code that adds new element at the end - not used - see coments in 'chunk_change_file'
 			fl = flist_get(*findxptr = flist_alloc());
 			fl->nexti = FLISTNULLINDX;
 */
@@ -3563,7 +3564,7 @@ int chunk_univ_multi_modify(uint32_t ts,uint8_t mr,uint8_t continueop,uint64_t *
 		csstable = 0;
 	}
 
-	cschanges = (csstable==0 || (matocsserv_receiving_chunks_state()&TRANSFERRING_NEW_CHUNKS))?1:0;
+	cschanges = (csstable==0 || (matocsserv_receiving_chunks_state()&TRANSFERING_NEW_CHUNKS))?1:0;
 
 	if (chunk_counters_in_progress()==0 && csdb_have_all_servers()) {
 		csalldata = 1;
@@ -3787,7 +3788,7 @@ int chunk_univ_multi_truncate(uint32_t ts,uint8_t mr,uint64_t *nchunkid,uint64_t
 		csstable = 0;
 	}
 
-	cschanges = (csstable==0 || (matocsserv_receiving_chunks_state()&TRANSFERRING_NEW_CHUNKS))?1:0;
+	cschanges = (csstable==0 || (matocsserv_receiving_chunks_state()&TRANSFERING_NEW_CHUNKS))?1:0;
 
 	if (chunk_counters_in_progress()==0 && csdb_have_all_servers()) {
 		csalldata = 1;
@@ -4716,7 +4717,7 @@ void chunk_server_disconnection_loop(void) {
 	if (discservers) {
 		startutime = monotonic_useconds();
 		currutime = startutime;
-		while (startutime+(JobsTimerMilliSeconds*200)>currutime) {
+		while (startutime+(JobsTimerMiliSeconds*200)>currutime) {
 			for (i=0 ; i<100 ; i++) {
 				if (discserverspos<chunkrehashpos) {
 					for (c=chunkhashtab[discserverspos>>HASHTAB_LOBITS][discserverspos&HASHTAB_MASK] ; c ; c=cn ) {
@@ -6265,7 +6266,7 @@ void chunk_do_jobs(chunk *c,uint8_t mode,uint32_t now,uint8_t extrajob) {
 //	- all servers (ec_strict_mode == 0)
 // * COPY -> EC condition
 //	- STRICT (RLA >= N+2X)
-//	- DEFAULT (RLA >= N+2X)
+//	- DEFULT (RLA >= N+2X)
 //	- LOOSE (RA >= N+2X)
 // * EC -> COPY condition
 //	- STRICT (VLA < N+X)
@@ -6294,7 +6295,7 @@ void chunk_do_jobs(chunk *c,uint8_t mode,uint32_t now,uint8_t extrajob) {
 // - (VLD + VLB - (N+X)) - UX for checksum parts (chksumec_both_labels_limit)
 // * COPY -> EC condition:
 //	- STRICT (RLA >= N+2X && RLD+RLB >= N+X && RLC+RLB >= 2X)
-//	- DEFAULT (RLA >= N+2X && RLD+RLB >= N+X && RLC+RLB >= 2X)
+//	- DEFULT (RLA >= N+2X && RLD+RLB >= N+X && RLC+RLB >= 2X)
 //	- LOOSE (RA >= N+2X)
 // * EC -> COPY condition:
 //	- STRICT (VLA < N+X || VLD+VLB < N || VLC+VLB < X)
@@ -6507,9 +6508,9 @@ void chunk_do_jobs(chunk *c,uint8_t mode,uint32_t now,uint8_t extrajob) {
 
 		if (tdc+vc+tdb+bc+allecgoalequiv==0 && (wvc|tdw|ivc|wvcmask8|tdwmask8|ivcmask8|wvcmask4|tdwmask4|ivcmask4)!=0 && c->fhead>FLISTNULLINDX) {
 			if ((wvc|tdw|wvcmask8|tdwmask8|wvcmask4|tdwmask4)==0) {
-				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"chunk %016"PRIX64"_%08"PRIX32" has only invalid copies (%"PRIu32") - please repair it manually",c->chunkid,c->version,ivc);
+				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"chunk %016"PRIX64" has only invalid copies (%"PRIu32") - please repair it manually",c->chunkid,ivc);
 			} else {
-				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"chunk %016"PRIX64"_%08"PRIX32" has only copies with wrong versions (%"PRIu32") - please repair it manually",c->chunkid,c->version,wvc+tdw);
+				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"chunk %016"PRIX64" has only copies with wrong versions (%"PRIu32") - please repair it manually",c->chunkid,wvc+tdw);
 			}
 			for (s=c->slisthead ; s ; s=s->next) {
 				if (s->valid==INVALID) {
@@ -7292,7 +7293,7 @@ void chunk_do_jobs(chunk *c,uint8_t mode,uint32_t now,uint8_t extrajob) {
 		// generate missing EC parts from existing EC parts
 		for (i=0,mask=1 ; i<8 && j<servcnt ; i++,mask<<=1) {
 			if ((mask & vcmask8) == 0) {
-				if ((mask & survivorsmask8)) { // hypothetical mark for removal copy
+				if ((mask & survivorsmask8)) { // hipothetical mark for removal copy
 					if (chunk_replicate(SIMPLE,now,c,8,i+0x20,eccsid8[i],servers[j],NULL,NULL,NULL,(extrajob==2)?RECOVER_IO:(regularecgoalequiv==1)?REPL_EC_ENDANGERED:REPL_EC_UNDERGOAL)!=0) {
 						job_exit_reasons[c->sclassid][ERROR_REPLICATING_MISSING_EC8_DATA_PART_FROM_MFR]++;
 						return;
@@ -7334,7 +7335,7 @@ void chunk_do_jobs(chunk *c,uint8_t mode,uint32_t now,uint8_t extrajob) {
 		// generate missing EC parts from existing EC parts
 		for (i=0,mask=1 ; i<4 && j<servcnt ; i++,mask<<=1) {
 			if ((mask & vcmask4) == 0) {
-				if ((mask & survivorsmask4)) { // hypothetical mark for removal copy
+				if ((mask & survivorsmask4)) { // hipothetical mark for removal copy
 					if (chunk_replicate(SIMPLE,now,c,4,i+0x10,eccsid4[i],servers[j],NULL,NULL,NULL,(extrajob==2)?RECOVER_IO:(regularecgoalequiv==1)?REPL_EC_ENDANGERED:REPL_EC_UNDERGOAL)!=0) {
 						job_exit_reasons[c->sclassid][ERROR_REPLICATING_MISSING_EC4_DATA_PART_FROM_MFR]++;
 						return;
@@ -7430,7 +7431,7 @@ void chunk_do_jobs(chunk *c,uint8_t mode,uint32_t now,uint8_t extrajob) {
 		for (i=ec_data_parts,mask=(UINT32_C(1)<<ec_data_parts) ; i<(ec_data_parts-1)+goal && j<servcnt ; i++,mask<<=1) {
 			if (ec_data_parts==8) {
 				if ((mask & vcmask8) == 0) {
-					if ((mask & survivorsmask8)) { // hypothetical mark for removal copy
+					if ((mask & survivorsmask8)) { // hipothetical mark for removal copy
 						if (chunk_replicate(SIMPLE,now,c,ec_data_parts,i+0x20,eccsid8[i],servers[j],NULL,NULL,NULL,(regularecgoalequiv==1)?REPL_EC_ENDANGERED:REPL_EC_UNDERGOAL)!=0) {
 							job_exit_reasons[c->sclassid][ERROR_REPLICATING_MISSING_EC8_CHKSUM_PART_FROM_MFR]++;
 							return;
@@ -7449,7 +7450,7 @@ void chunk_do_jobs(chunk *c,uint8_t mode,uint32_t now,uint8_t extrajob) {
 				}
 			} else { // ec_data_parts==4
 				if ((mask & vcmask4) == 0) {
-					if ((mask & survivorsmask4)) { // hypothetical mark for removal copy
+					if ((mask & survivorsmask4)) { // hipothetical mark for removal copy
 						if (chunk_replicate(SIMPLE,now,c,ec_data_parts,i+0x10,eccsid4[i],servers[j],NULL,NULL,NULL,(regularecgoalequiv==1)?REPL_EC_ENDANGERED:REPL_EC_UNDERGOAL)!=0) {
 							job_exit_reasons[c->sclassid][ERROR_REPLICATING_MISSING_EC4_CHKSUM_PART_FROM_MFR]++;
 							return;
@@ -9257,14 +9258,14 @@ void chunk_load_cfg_common(void) {
 
 	DangerMinLeng = DangerMaxLeng/100;
 
-	JobsTimerMilliSeconds = cfg_getuint32("JOBS_TIMER_MILLISECONDS",5); // debug option
-	if (JobsTimerMilliSeconds<1) {
-		JobsTimerMilliSeconds=1;
+	JobsTimerMiliSeconds = cfg_getuint32("JOBS_TIMER_MILISECONDS",5); // debug option
+	if (JobsTimerMiliSeconds<1) {
+		JobsTimerMiliSeconds=1;
 	}
-	if (JobsTimerMilliSeconds>50) {
-		JobsTimerMilliSeconds=50;
+	if (JobsTimerMiliSeconds>50) {
+		JobsTimerMiliSeconds=50;
 	}
-	TicksPerSecond = 1000/JobsTimerMilliSeconds;
+	TicksPerSecond = 1000/JobsTimerMiliSeconds;
 
 	MaxFailsPerClass = cfg_getuint32("MAX_FAILS_PER_CLASS",5); // debug option
 
@@ -9364,17 +9365,17 @@ void chunk_loginfo(FILE *fd) {
 void chunk_reload(void) {
 	uint32_t oldMaxDelSoftLimit,oldMaxDelHardLimit;
 	uint32_t cps;
-	uint32_t oldJobsTimerMilliSeconds;
+	uint32_t oldJobsTimerMiliSeconds;
 	char *repstr;
 
 	oldMaxDelSoftLimit = MaxDelSoftLimit;
 	oldMaxDelHardLimit = MaxDelHardLimit;
-	oldJobsTimerMilliSeconds = JobsTimerMilliSeconds;
+	oldJobsTimerMiliSeconds = JobsTimerMiliSeconds;
 
 	chunk_load_cfg_common();
 
-	if (oldJobsTimerMilliSeconds!=JobsTimerMilliSeconds) {
-		main_msectime_change(jobs_timer,JobsTimerMilliSeconds,0);
+	if (oldJobsTimerMiliSeconds!=JobsTimerMiliSeconds) {
+		main_msectime_change(jobs_timer,JobsTimerMiliSeconds,0);
 	}
 
 	MaxDelSoftLimit = cfg_getuint32("CHUNKS_SOFT_DEL_LIMIT",10);
@@ -9641,7 +9642,7 @@ int chunk_strinit(void) {
 	main_reload_register(chunk_reload);
 	// main_time_register(1,0,chunk_jobs_main);
 	main_info_register(chunk_loginfo);
-	jobs_timer = main_msectime_register(JobsTimerMilliSeconds,0,chunk_jobs_main);
+	jobs_timer = main_msectime_register(JobsTimerMiliSeconds,0,chunk_jobs_main);
 	main_time_register(60,0,chunk_queue_counters_shift);
 	main_time_register(60,0,chunk_job_exit_counters_shift);
 	main_time_register(60,0,chunk_job_call_counters_shift);

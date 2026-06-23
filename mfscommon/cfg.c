@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -354,7 +355,7 @@ static inline type str_to_##fname (char *x) { \
 	type r; \
 	r = convfn(x,&e,0); \
 	if (*e && *e!='\t' && *e!=' ') { \
-		mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_WARNING,"config: number expected, got '%s'",x); \
+		mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_WARNING,"config: number expected, got '%s'"); \
 	} \
 	return r; \
 }
@@ -370,7 +371,7 @@ static inline double str_to_double (char *x) {
 	double r;
 	r = strtod(x,&e);
 	if (*e && *e!='\t' && *e!=' ') { \
-		mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_WARNING,"config: number expected, got '%s'",x);
+		mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_WARNING,"config: number expected, got '%s'");
 	}
 	return r;
 }

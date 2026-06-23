@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -1023,7 +1024,7 @@ void masterconn_localsplit(masterconn *eptr,const uint8_t *data,uint32_t length)
 		parts = 8;
 	}
 	if (parts!=8 && parts!=4) {
-		mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"MATOCS_LOCALSPLIT - unsupported parts number (%"PRIu8"/4|8)",parts);
+		mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"MATOCS_LOCALSPLIT - unsupported parts number (%"PRIu8"/4|8)",length,parts);
 		eptr->mode = KILL;
 		return;
 	}
@@ -1478,8 +1479,13 @@ int masterconn_initconnect(masterconn *eptr) {
 		}
 		eptr->bindip = bip;
 		if (tcpresolve(MasterHost,MasterPort,&mip,&mport,0)>=0) {
-			eptr->masterip = mip;
-			eptr->masterport = mport;
+			if ((mip&0xFF000000)!=0x7F000000) {
+				eptr->masterip = mip;
+				eptr->masterport = mport;
+			} else {
+				mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_WARNING,"master connection module: localhost (%u.%u.%u.%u) can't be used for connecting with master (use ip address of network controller)",(mip>>24)&0xFF,(mip>>16)&0xFF,(mip>>8)&0xFF,mip&0xFF);
+				return -1;
+			}
 		} else {
 			mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_WARNING,"master connection module: can't resolve master host/port (%s:%s)",MasterHost,MasterPort);
 			return -1;

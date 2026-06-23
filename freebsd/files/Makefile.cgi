@@ -1,19 +1,17 @@
-PORTNAME=		moosefs-cgi
-DISTVERSION=		0.0.0
-CATEGORIES=		filesystems
-
+PORTNAME= 		moosefs-cgi
+PORTVERSION=		0.0.0
+CATEGORIES= 		filesystems
 MAINTAINER=		freebsd@moosefs.com
 COMMENT=		Meta package to redirect old -cgi package to new -gui package
-WWW=			https://moosefs.com/
+MASTER_SITES=
 
-LICENSE=		GPLv2
+RUN_DEPENDS=		moosefs-gui>0:filesystems/moosefs-gui
+
+NO_BUILD= 		yes
+NO_ARCH= 		yes
+USES=			metaport
 
 DEPRECATED=		Renamed to moosefs-gui
 EXPIRATION_DATE=	2026-12-31
-
-RUN_DEPENDS=		moosefs-gui>0:filesystems/moosefs-gui
-USES=			metaport
-NO_ARCH=		yes
-NO_BUILD=		yes
 
 .include <bsd.port.mk>

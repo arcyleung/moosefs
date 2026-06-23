@@ -1,4 +1,4 @@
-.TH mfschunktool "8" "May 2026" "MooseFS 4.59.2-1" "This is part of MooseFS"
+.TH mfschunktool "8" "October 2025" "MooseFS 4.58.1-1" "This is part of MooseFS"
 .ss 12 0
 .SH NAME
 mfschunktool - checks chunk integrity offline
@@ -17,7 +17,7 @@ It can also 'repair' chunk (fix stored checksums). This tool may be useful to ch
 written chunks after possible data corruption (power down etc.)
 If the supplied parameter is a file, the tool will check this file. If the supplied parameter is a directory, the tool will traverse this directory recursively and try to check all files that seem to be chunks (they are named like chunk files or, if \fB\-n\fP option is used, also have headers like chunk files, even when the name is wrong).
 .PP
-\fBNotice! This tool should never be used while the chunk server process is active!\fP If the tool is used on a chunk disk (aka path in mfshdd.cfg file) it will check if the chunk server is working and refuse to operate. But if it's used on a single file or subdirectory, such check is not possible and it's the responsibility of the user to make sure the tool is not used on "working" chunks, as it could lead to data loss.
+\fBNotice! This tool should never be used while the chunk server process is active!\fP If the tool is used on a chunk disk (aka path in mfshdd.cfg file) it will check if the chunk server is working and refuse to operate. But if it's used on a single file or subdirectory, such check is not possible and it's the reponsibility of the user to make sure the tool is not used on "working" chunks, as it could lead to data loss.
 .SH OPTIONS
 .TP
 \fB\-f\fP
@@ -41,13 +41,13 @@ move damaged chunks to a specified directory \fIdamaged_dir\fP; see NOTES
 .PP
 The option to move damaged chunks to a specified directory is most useful when whole directories (disks) with chunks are scanned, and can be employed in different ways, depending on what other options are used at the same time.
 .PP
-If \fB\-r\fP option is used together with \fB\-m\fP option, then only chunks that are unrepairable will be moved. This is a fast approach to chunk repairing, that repairs and cleans the chunk directory (disk) in one go.
+If \fB\-r\fP option is used together with \fB\-m\fP option, then only chunks that are unrepairable will be moved. This is a fast approach to chunk reparing, that repairs and cleans the chunk directory (disk) in one go.
 .PP
 If only option \fB\-m\fP is used, then all damaged chunks will be moved to a specified directory. The user can then use the \fBmfschunktool\fP again in this directory, this time with the \fB\-r\fP option, to repair all chunks that can be repaired, but only introduce the repaired chunks back into the system if there is no other copy available from another chunkserver (a copy that did not need a repair operation in the first place). This is a more time consuming, but safer approach to repairing multiple chunks, e.g. after a power failure.
 .SH "REPORTING BUGS"
 Report bugs to <bugs@moosefs.com>.
 .SH COPYRIGHT
-Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 
 This file is part of MooseFS.
 
@@ -61,7 +61,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, see
-<https://www.gnu.org/licenses/>.
+along with MooseFS; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+or visit http://www.gnu.org/licenses/gpl-2.0.html
 .SH "SEE ALSO"
 .BR mfschunkserver (8)

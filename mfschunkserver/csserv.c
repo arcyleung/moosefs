@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #include "config.h"
@@ -192,15 +193,7 @@ void csserv_get_config(csserventry *eptr,const uint8_t *data,uint32_t length) {
 	}
 	memcpy(name,data,nleng);
 	name[nleng] = 0;
-	if (strcmp(name,"AUTH_CODE")==0) {
-		if (cfg_isdefined(name)) {
-			val = strdup("[DEFINED]");
-		} else {
-			val = NULL;
-		}
-	} else {
-		val = cfg_getdefaultstr(name);
-	}
+	val = cfg_getdefaultstr(name);
 	if (val!=NULL) {
 		vleng = strlen(val);
 		if (vleng>255) {
@@ -217,8 +210,6 @@ void csserv_get_config(csserventry *eptr,const uint8_t *data,uint32_t length) {
 	}
 }
 
-/* for future use */
-#if 0
 void csserv_get_config_file(csserventry *eptr,const uint8_t *data,uint32_t length) {
 	uint32_t msgid;
 	char name[256];
@@ -253,7 +244,6 @@ void csserv_get_config_file(csserventry *eptr,const uint8_t *data,uint32_t lengt
 		free(fdata);
 	}
 }
-#endif
 
 void csserv_iothread_finished(uint8_t status,void *e) {
 	csserventry *eptr = (csserventry*)e;
@@ -687,9 +677,9 @@ void csserv_gotpacket(csserventry *eptr,uint32_t type,const uint8_t *data,uint32
 		case ANTOAN_GET_CONFIG:
 			csserv_get_config(eptr,data,length);
 			break;
-//		case ANTOAN_GET_CONFIG_FILE:
-//			csserv_get_config_file(eptr,data,length);
-//			break;
+		case ANTOAN_GET_CONFIG_FILE:
+			csserv_get_config_file(eptr,data,length);
+			break;
 		case CLTOCS_READ:
 			csserv_read_init(eptr,data,length);
 			break;

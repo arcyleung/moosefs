@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -29,7 +30,7 @@
 #include "labelparser.h"
 #include "MFSCommunication.h"
 
-/* simple version - just compare expressions byte by byte, in the future it can be smarter and returns true for example for A&B and B&A */
+/* simple version - just compare expressions byte by byte, in the future it can be smarter and retrns true for example for A&B and B&A */
 static inline uint8_t labelexpr_diff(const uint8_t *labelexpr1,const uint8_t *labelexpr2) {
 	uint8_t n1,n2;
 	while (1) {

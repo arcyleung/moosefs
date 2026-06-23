@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -121,7 +122,7 @@ uint8_t posix_acl_accmode(uint32_t inode,uint32_t auid,uint32_t agids,uint32_t *
 	static uint8_t modetoaccmode[8] = MODE_TO_ACCMODE;
 	acl_node *acn;
 	int f;
-	uint32_t i;
+	uint16_t i;
 	uint32_t j;
 	uint8_t modemask;
 
@@ -148,7 +149,7 @@ uint8_t posix_acl_accmode(uint32_t inode,uint32_t auid,uint32_t agids,uint32_t *
 				f = 1;
 			}
 		}
-		for (i=acn->namedusers ; i<(uint32_t)(acn->namedusers)+(uint32_t)(acn->namedgroups) ; i++) {
+		for (i=acn->namedusers ; i<acn->namedusers+acn->namedgroups ; i++) {
 			for (j=0 ; j<agids ; j++) {
 				if (agid[j]==acn->acltab[i].id) {
 					modemask |= modetoaccmode[acn->acltab[i].perm & acn->mask & 0x7];
@@ -164,7 +165,7 @@ uint8_t posix_acl_accmode(uint32_t inode,uint32_t auid,uint32_t agids,uint32_t *
 }
 
 uint8_t posix_acl_copydefaults(uint32_t parent,uint32_t inode,uint8_t directory,uint16_t *mode) {
-	uint32_t i,acls;
+	uint16_t i,acls;
 	uint8_t ret;
 	acl_node *pacn;
 	acl_node *acn;
@@ -174,7 +175,7 @@ uint8_t posix_acl_copydefaults(uint32_t parent,uint32_t inode,uint8_t directory,
 	if (pacn==NULL) {
 		return ret;
 	}
-	acls = (uint32_t)(pacn->namedusers) + (uint32_t)(pacn->namedgroups);
+	acls = pacn->namedusers + pacn->namedgroups;
 	if (acls==0 && pacn->userperm<=7 && pacn->groupperm<=7 && pacn->otherperm<=7 && pacn->mask==0xFFFF) { // simple ACL as DEFAULT - just modify mode
 		*mode &= 0xFE00 | (pacn->userperm << 6) | (pacn->groupperm << 3) | pacn->otherperm;
 	} else {
@@ -194,7 +195,7 @@ uint8_t posix_acl_copydefaults(uint32_t parent,uint32_t inode,uint8_t directory,
 		acn->mask |= ((*mode)>>3)&7;
 		acn->mask &= pacn->mask;
 		*mode = ((*mode) & 0xFE00) | ((acn->userperm&7) << 6) | ((acn->groupperm&7) << 3) | (acn->otherperm&7); // groupperm not mask here !!!
-		if ((uint32_t)(acn->namedusers)+(uint32_t)(acn->namedgroups)!=acls) {
+		if (acn->namedusers+acn->namedgroups!=acls) {
 			if (acn->acltab!=NULL) {
 				free(acn->acltab);
 			}
@@ -222,7 +223,7 @@ uint8_t posix_acl_copydefaults(uint32_t parent,uint32_t inode,uint8_t directory,
 		acn->groupperm = pacn->groupperm;
 		acn->otherperm = pacn->otherperm;
 		acn->mask = pacn->mask;
-		if ((uint32_t)(acn->namedusers)+(uint32_t)(acn->namedgroups)!=acls) {
+		if (acn->namedusers+acn->namedgroups!=acls) {
 			if (acn->acltab!=NULL) {
 				free(acn->acltab);
 			}
@@ -256,7 +257,7 @@ void posix_acl_remove(uint32_t inode,uint8_t acltype) {
 }
 
 void posix_acl_set(uint32_t inode,uint8_t acltype,uint16_t userperm,uint16_t groupperm,uint16_t otherperm,uint16_t mask,uint16_t namedusers,uint16_t namedgroups,const uint8_t *aclblob) {
-	uint32_t i,acls;
+	uint16_t i,acls;
 	acl_node *acn;
 
 	if (acltype==POSIX_ACL_ACCESS && ((namedusers | namedgroups) == 0) && userperm<=7 && groupperm<=7 && otherperm<=7 && mask==0xFFFF) {
@@ -271,12 +272,12 @@ void posix_acl_set(uint32_t inode,uint8_t acltype,uint16_t userperm,uint16_t gro
 		fs_set_aclflag(inode,acltype);
 	}
 
-	acls = (uint32_t)namedusers + (uint32_t)namedgroups;
+	acls = namedusers + namedgroups;
 	acn->userperm = userperm;
 	acn->groupperm = groupperm;
 	acn->otherperm = otherperm;
 	acn->mask = mask;
-	if ((uint32_t)(acn->namedusers)+(uint32_t)(acn->namedgroups)!=acls) {
+	if (acn->namedusers+acn->namedgroups!=acls) {
 		if (acn->acltab!=NULL) {
 			free(acn->acltab);
 		}
@@ -304,13 +305,13 @@ int32_t posix_acl_get_blobsize(uint32_t inode,uint8_t acltype,void **aclnode) {
 	if (acn==NULL) {
 		return -1;
 	} else {
-		return ((uint32_t)(acn->namedusers)+(uint32_t)(acn->namedgroups))*6;
+		return (acn->namedusers+acn->namedgroups)*6;
 	}
 }
 
 void posix_acl_get_data(void *aclnode,uint16_t *userperm,uint16_t *groupperm,uint16_t *otherperm,uint16_t *mask,uint16_t *namedusers,uint16_t *namedgroups,uint8_t *aclblob) {
 	acl_node *acn;
-	uint32_t i,acls;
+	uint16_t i,acls;
 
 	acn = (acl_node*)aclnode;
 
@@ -320,7 +321,7 @@ void posix_acl_get_data(void *aclnode,uint16_t *userperm,uint16_t *groupperm,uin
 	*mask = acn->mask;
 	*namedusers = acn->namedusers;
 	*namedgroups = acn->namedgroups;
-	acls = (uint32_t)(acn->namedusers)+(uint32_t)(acn->namedgroups);
+	acls = acn->namedusers+acn->namedgroups;
 	for (i=0 ; i<acls ; i++) {
 		put32bit(&aclblob,acn->acltab[i].id);
 		put16bit(&aclblob,acn->acltab[i].perm);
@@ -329,14 +330,14 @@ void posix_acl_get_data(void *aclnode,uint16_t *userperm,uint16_t *groupperm,uin
 
 uint32_t posix_acl_getall(uint32_t inode,uint8_t acltype,uint8_t *dbuff) {
 	acl_node *acn;
-	uint32_t i,acls;
+	uint16_t i,acls;
 
 	acn = GLUE_FN_NAME_PREFIX(_find)(inode,acltype);
 
 	if (acn==NULL) {
 		return 0;
 	} else {
-		acls = (uint32_t)(acn->namedusers)+(uint32_t)(acn->namedgroups);
+		acls = acn->namedusers+acn->namedgroups;
 		if (dbuff!=NULL) {
 			put16bit(&dbuff,acn->userperm);
 			put16bit(&dbuff,acn->groupperm);
@@ -355,8 +356,7 @@ uint32_t posix_acl_getall(uint32_t inode,uint8_t acltype,uint8_t *dbuff) {
 
 uint8_t posix_acl_check(uint32_t inode,uint8_t acltype,uint16_t userperm,uint16_t groupperm,uint16_t otherperm,uint16_t mask,uint16_t namedusers,uint16_t namedgroups,const uint8_t *aclblob) {
 	acl_node *acn;
-	uint16_t i;
-	uint32_t j;
+	uint16_t i,j;
 	uint16_t checkcnt;
 	uint32_t id;
 	uint16_t perm;
@@ -381,13 +381,13 @@ uint8_t posix_acl_check(uint32_t inode,uint8_t acltype,uint16_t userperm,uint16_
 	for (i=0 ; i<namedgroups ; i++) {
 		id = get32bit(&aclblob);
 		perm = get16bit(&aclblob);
-		for (j=namedusers ; j<(uint32_t)namedusers+(uint32_t)namedgroups ; j++) {
+		for (j=namedusers ; j<namedusers+namedgroups ; j++) {
 			if (acn->acltab[j].id==id && acn->acltab[j].perm==perm) {
 				checkcnt++;
 			}
 		}
 	}
-	return (checkcnt!=((uint32_t)namedusers+(uint32_t)namedgroups))?0:1;
+	return (checkcnt!=(namedusers+namedgroups))?0:1;
 }
 
 uint8_t posix_acl_copy(uint32_t srcinode,uint32_t dstinode,uint8_t acltype) {
@@ -413,7 +413,7 @@ uint8_t posix_acl_copy(uint32_t srcinode,uint32_t dstinode,uint8_t acltype) {
 	dacn->mask = sacn->mask;
 	dacn->namedusers = sacn->namedusers;
 	dacn->namedgroups = sacn->namedgroups;
-	acls = (uint32_t)(sacn->namedusers) + (uint32_t)(sacn->namedgroups);
+	acls = sacn->namedusers + sacn->namedgroups;
 	if (acls>0) {
 		dacn->acltab = malloc(sizeof(acl_entry)*acls);
 		passert(dacn->acltab);
@@ -475,7 +475,7 @@ uint8_t posix_acl_store(bio *fd) {
 					accnt = 0;
 					acbcnt = 0;
 					ptr = aclbuff;
-					while (accnt<(uint32_t)(acn->namedusers)+(uint32_t)(acn->namedgroups)) {
+					while (accnt<acn->namedusers+acn->namedgroups) {
 						if (acbcnt==100) {
 							if (bio_write(fd,aclbuff,6*100)!=(6*100)) {
 								return 0xFF;
@@ -543,7 +543,7 @@ int posix_acl_load(bio *fd,uint8_t mver,int ignoreflag) {
 		mask = get16bit(&ptr);
 		namedusers = get16bit(&ptr);
 		namedgroups = get16bit(&ptr);
-		acls = (uint32_t)namedusers + (uint32_t)namedgroups;
+		acls = namedusers + namedgroups;
 		if (fs_check_inode(inode)==0) { // silently skip acl's for non-existent inodes
 			bio_skip(fd,6*acls);
 			continue;

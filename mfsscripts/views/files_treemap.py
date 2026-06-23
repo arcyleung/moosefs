@@ -27,49 +27,43 @@ def render(dp, fields, vld):
 	out.append('</div>')
 
 	# Add configuration controls
-	out.extend(render_treemap_controls(config))
+	out.append(render_treemap_controls(config))
 
 	# Add treemap visualization container
-	out.extend(render_treemap_container(treemap_data, config))
+	out.append(render_treemap_container(treemap_data, config))
 
 	# Add statistics panel
-	out.extend(render_treemap_stats(treemap_data))
+	out.append(render_treemap_stats(treemap_data))
 
 	# Add JavaScript initialization
-	out.extend(render_treemap_script(treemap_data, config))
+	out.append(render_treemap_script(treemap_data, config))
 
-	return out
+	return "\n".join(out)
 
 def parse_treemap_config(fields):
 	"""Parse treemap configuration from form fields."""
 	config = TreemapConfig()
 
 	# Parse path
-	if 'path' in fields:
-		val = fields.getvalue('path')
-		if val:
-			config.path = val
+	if 'path' in fields and fields['path']:
+		config.path = fields['path']
 
 	# Parse depth
-	if 'depth' in fields:
-		val = fields.getvalue('depth')
-		if val:
-			try:
-				config.depth = int(val)
-				config.depth = max(1, min(10, config.depth))  # Clamp between 1-10
-			except ValueError:
-				config.depth = 3
+	if 'depth' in fields and fields['depth']:
+		try:
+			config.depth = int(fields['depth'])
+			config.depth = max(1, min(10, config.depth))  # Clamp between 1-10
+		except ValueError:
+			config.depth = 3
 
 	# Parse color scheme
-	if 'color_by' in fields:
-		val = fields.getvalue('color_by')
-		if val and val in ['type', 'age', 'size']:
-			config.color_by = val
+	if 'color_by' in fields and fields['color_by']:
+		if fields['color_by'] in ['type', 'age', 'size']:
+			config.color_by = fields['color_by']
 
 	# Parse include files
 	if 'include_files' in fields:
-		val = fields.getvalue('include_files')
-		config.include_files = (val == '1')
+		config.include_files = fields['include_files'] == '1'
 
 	return config
 
@@ -126,7 +120,7 @@ def render_treemap_controls(config):
 
 	out.append('</div><!-- treemap-controls -->')
 
-	return out
+	return "\n".join(out)
 
 def render_treemap_container(treemap_data, config):
 	"""Render the main treemap visualization container."""
@@ -140,12 +134,12 @@ def render_treemap_container(treemap_data, config):
 	else:
 		# Breadcrumb navigation
 		out.append('<div class="treemap-breadcrumb" id="treemap-breadcrumb">')
-		out.extend(render_breadcrumb_navigation(treemap_data))
+		out.append(render_breadcrumb_navigation(treemap_data))
 		out.append('</div>')
 
 		# Treemap container
-		out.append('<div class="treemap-container" style="width:100%;">')
-		out.append('<div id="treemap-visualization" style="width:100%; min-height:600px;" ')
+		out.append('<div class="treemap-container">')
+		out.append('<div id="treemap-visualization" ')
 		out.append('data-treemap="true" ')
 		out.append('data-color-scheme="%s" ' % config.color_by)
 		out.append('data-include-files="%s" ' % ('true' if config.include_files else 'false'))
@@ -153,7 +147,7 @@ def render_treemap_container(treemap_data, config):
 		out.append('</div>')
 		out.append('</div>')
 
-	return out
+	return "\n".join(out)
 
 def render_breadcrumb_navigation(treemap_data):
 	"""Render breadcrumb navigation for current path."""
@@ -177,7 +171,7 @@ def render_breadcrumb_navigation(treemap_data):
 				out.append('<a href="#" class="treemap-breadcrumb-item" data-path="%s">%s</a>' %
 					(html_escape(current_path), html_escape(part)))
 
-	return out
+	return "\n".join(out)
 
 def render_treemap_stats(treemap_data):
 	"""Render treemap statistics panel."""
@@ -219,15 +213,132 @@ def render_treemap_stats(treemap_data):
 		out.append('<div class="treemap-legend" id="treemap-legend">')
 		out.append('</div>')
 
-	return out
+	return "\n".join(out)
 
 def render_treemap_script(treemap_data, config):
-	"""Embed treemap data as JSON script tag (consumed by treemap.js auto-init)."""
+	"""Render JavaScript initialization for treemap."""
 	out = []
-	out.append('<script type="application/json" id="treemap-initial-data">')
-	out.append(json.dumps(treemap_data))
+
+	out.append('<script type="text/javascript">')
+	out.append('document.addEventListener(\'DOMContentLoaded\', function() {')
+	out.append('  const treemapContainer = document.getElementById(\'treemap-visualization\');')
+	out.append('  if (treemapContainer && treemapContainer.treemapInstance) {')
+	out.append('    // Set initial data')
+	out.append('    treemapContainer.treemapInstance.setData(%s);' % json.dumps(treemap_data))
+	out.append('    ')
+	out.append('    // Setup event listeners for controls')
+	out.append('    setupTreemapControls(treemapContainer.treemapInstance);')
+	out.append('    ')
+	out.append('    // Setup navigation event listener')
+	out.append('    treemapContainer.addEventListener(\'treemapNavigate\', function(e) {')
+	out.append('      onTreemapNavigate(e.detail.path);')
+	out.append('    });')
+	out.append('  }')
+	out.append('  ')
+	out.append('  // Initialize legend')
+	out.append('  updateLegend();')
+	out.append('});')
+	out.append('')
+	out.append('function setupTreemapControls(treemap) {')
+	out.append('  // Path input')
+	out.append('  const pathInput = document.getElementById(\'treemap-path\');')
+	out.append('  pathInput.addEventListener(\'change\', function() {')
+	out.append('    updateTreemap();')
+	out.append('  });')
+	out.append('  ')
+	out.append('  // Depth selector')
+	out.append('  const depthSelect = document.getElementById(\'treemap-depth\');')
+	out.append('  depthSelect.addEventListener(\'change\', function() {')
+	out.append('    updateTreemap();')
+	out.append('  });')
+	out.append('  ')
+	out.append('  // Color scheme selector')
+	out.append('  const colorSelect = document.getElementById(\'treemap-color-scheme\');')
+	out.append('  colorSelect.addEventListener(\'change\', function() {')
+	out.append('    treemap.updateConfig({ colorScheme: this.value });')
+	out.append('    updateLegend();')
+	out.append('  });')
+	out.append('  ')
+	out.append('  // Include files checkbox')
+	out.append('  const includeFilesCheckbox = document.getElementById(\'treemap-include-files\');')
+	out.append('  includeFilesCheckbox.addEventListener(\'change\', function() {')
+	out.append('    updateTreemap();')
+	out.append('  });')
+	out.append('  ')
+	out.append('  // Refresh button')
+	out.append('  const refreshButton = document.getElementById(\'treemap-refresh\');')
+	out.append('  refreshButton.addEventListener(\'click\', function() {')
+	out.append('    updateTreemap();')
+	out.append('  });')
+	out.append('}')
+	out.append('')
+	out.append('function updateTreemap() {')
+	out.append('  const path = document.getElementById(\'treemap-path\').value;')
+	out.append('  const depth = parseInt(document.getElementById(\'treemap-depth\').value);')
+	out.append('  const includeFiles = document.getElementById(\'treemap-include-files\').checked;')
+	out.append('  ')
+	out.append('  // Update URL parameters')
+	out.append('  const url = new URL(window.location);')
+	out.append('  url.searchParams.set(\'path\', path);')
+	out.append('  url.searchParams.set(\'depth\', depth);')
+	out.append('  url.searchParams.set(\'include_files\', includeFiles ? \'1\' : \'0\');')
+	out.append('  ')
+	out.append('  // Reload page with new parameters')
+	out.append('  window.location.href = url.toString();')
+	out.append('}')
+	out.append('')
+	out.append('function onTreemapNavigate(path) {')
+	out.append('  // Update path input and navigate')
+	out.append('  document.getElementById(\'treemap-path\').value = path;')
+	out.append('  updateTreemap();')
+	out.append('}')
+	out.append('')
+	out.append('function updateLegend() {')
+	out.append('  const colorScheme = document.getElementById(\'treemap-color-scheme\').value;')
+	out.append('  const legend = document.getElementById(\'treemap-legend\');')
+	out.append('  ')
+	out.append('  const legends = {')
+	out.append('    \'type\': [')
+	out.append('      { color: \'var(--treemap-color-directory)\', label: \'Directory\' },')
+	out.append('      { color: \'var(--treemap-color-image)\', label: \'Images\' },')
+	out.append('      { color: \'var(--treemap-color-video)\', label: \'Videos\' },')
+	out.append('      { color: \'var(--treemap-color-audio)\', label: \'Audio\' },')
+	out.append('      { color: \'var(--treemap-color-document)\', label: \'Documents\' },')
+	out.append('      { color: \'var(--treemap-color-archive)\', label: \'Archives\' },')
+	out.append('      { color: \'var(--treemap-color-code)\', label: \'Code\' },')
+	out.append('      { color: \'var(--treemap-color-other)\', label: \'Other\' }')
+	out.append('    ],')
+	out.append('    \'age\': [')
+	out.append('      { color: \'var(--treemap-age-veryrecent)\', label: \'Very Recent (< 1 day)\' },')
+	out.append('      { color: \'var(--treemap-age-recent)\', label: \'Recent (1-7 days)\' },')
+	out.append('      { color: \'var(--treemap-age-medium)\', label: \'Medium (1-30 days)\' },')
+	out.append('      { color: \'var(--treemap-age-old)\', label: \'Old (1-12 months)\' },')
+	out.append('      { color: \'var(--treemap-age-veryold)\', label: \'Very Old (> 1 year)\' }')
+	out.append('    ],')
+	out.append('    \'size\': [')
+	out.append('      { color: \'var(--treemap-size-tiny)\', label: \'Tiny (< 1 KB)\' },')
+	out.append('      { color: \'var(--treemap-size-small)\', label: \'Small (1 KB - 1 MB)\' },')
+	out.append('      { color: \'var(--treemap-size-medium)\', label: \'Medium (1 MB - 1 GB)\' },')
+	out.append('      { color: \'var(--treemap-size-large)\', label: \'Large (1-10 GB)\' },')
+	out.append('      { color: \'var(--treemap-size-huge)\', label: \'Huge (> 10 GB)\' }')
+	out.append('    ]')
+	out.append('  };')
+	out.append('  ')
+	out.append('  const legendItems = legends[colorScheme] || [];')
+	out.append('  let html = \'\';')
+	out.append('  legendItems.forEach(item => {')
+	out.append('    html += `')
+	out.append('    <div class="treemap-legend-item">')
+	out.append('      <div class="treemap-legend-color" style="background-color: ${item.color}"></div>')
+	out.append('      <span>${item.label}</span>')
+	out.append('    </div>`;')
+	out.append('  });')
+	out.append('  ')
+	out.append('  legend.innerHTML = html;')
+	out.append('}')
 	out.append('</script>')
-	return out
+
+	return "\n".join(out)
 
 def format_bytes(bytes_value):
 	"""Format bytes in human-readable format."""
@@ -258,8 +369,8 @@ def html_escape(text):
 	if text is None:
 		return ''
 	return (str(text)
-		.replace('&', '&amp;')
-		.replace('<', '&lt;')
-		.replace('>', '&gt;')
-		.replace('"', '&quot;')
+		.replace('&', '&')
+		.replace('<', '<')
+		.replace('>', '>')
+		.replace('"', '"')
 		.replace("'", '&#x27;'))

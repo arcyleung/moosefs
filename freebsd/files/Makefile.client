@@ -1,11 +1,14 @@
-PORTREVISION=	0
-PKGNAMESUFFIX=	-${MFS_COMPONENT}
+# Created by: Jakub Kruszona-Zawadzki <acid@moosefs.com> ; Based on port created by: Chifeng Qu <chifeng@gmail.com>
+
+PKGNAMESUFFIX=	-client
 
 COMMENT=	MooseFS client tools
 
-BROKEN_powerpc64=	fails to compile: mfs_fuse.c: internal compiler error: Segmentation fault
+LICENSE=	GPLv2
 
 MFS_COMPONENT=	client
+
+BROKEN_powerpc64=	fails to compile: mfs_fuse.c: internal compiler error: Segmentation fault
 
 MASTERDIR=	${.CURDIR}/../moosefs-master
 

@@ -1,4 +1,4 @@
-.TH mfsipmap.cfg "5" "May 2026" "MooseFS 4.59.2-1" "This is part of MooseFS"
+.TH mfsipmap.cfg "5" "October 2025" "MooseFS 4.58.1-1" "This is part of MooseFS"
 .ss 12 0
 .SH NAME
 mfsipmap.cfg \- MooseFS chunkserver IP mappings
@@ -29,7 +29,7 @@ Chunk server's IP mappings are always defined in one format IP:IP:
 .br
 \fBn.n.n.n:r.r.r.r\fP
 .br
-If a client's IP is defined in the list directly preceding this mapping, the chunkserver with IP on the left side of the mapping will be presented to this client with the IP on the right side of the mapping.
+If a client's IP is defined in the list directly preceeding this mapping, the chunkserver with IP on the left side of the mapping will be presented to this client with the IP on the right side of the mapping.
 .PP
 Lines starting with \fB#\fP character are ignored as comments.
 .SH NOTES
@@ -75,7 +75,7 @@ Notice, that the same chunkserver (with IP \fB10.10.10.3\fP) will be presented t
 .PP
 Note: empty lines between sections are not necessary, they are used in the above examples only for ease of reading.
 .SH COPYRIGHT
-Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 
 This file is part of MooseFS.
 
@@ -89,8 +89,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, see
-<https://www.gnu.org/licenses/>.
+along with MooseFS; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+or visit http://www.gnu.org/licenses/gpl-2.0.html
 .SH "SEE ALSO"
 .BR mfsmaster (8),
 .BR mfsmaster.cfg (5)

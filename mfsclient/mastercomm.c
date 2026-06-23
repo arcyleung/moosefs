@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -852,6 +853,18 @@ static inline void fs_disconnect(void) {
 	disconnect = 1;
 	pthread_mutex_unlock(&fdlock);
 #endif
+}
+
+/* Retry idempotent master RPCs that return MFS_ERROR_EAGAIN (admission control
+ * under master overload). Only safe for pure-read / retryable ops — callers must
+ * not use this for CREATE/UNLINK/RENAME/etc. */
+static uint8_t fs_master_eagain_retry(uint8_t status, uint32_t attempt) {
+	if (status != MFS_ERROR_EAGAIN || attempt >= 3) {
+		return 0; /* do not retry */
+	}
+	/* 10ms, 25ms, 50ms backoff */
+	portable_usleep(10000u + attempt * 15000u);
+	return 1;
 }
 
 const uint8_t* fs_sendandreceive(threc *rec,uint32_t expected_cmd,uint32_t *answer_leng) {
@@ -2936,54 +2949,65 @@ uint8_t fs_simple_lookup(uint32_t parent,uint8_t nleng,const uint8_t *name,uint3
 	uint8_t *wptr;
 	const uint8_t *rptr;
 	uint32_t i;
-	uint8_t ret;
+	uint8_t ret = MFS_ERROR_IO;
 	uint8_t packetver;
+	uint32_t eagain_try;
 	threc *rec = fs_get_my_threc();
 	uint8_t asize = master_attrsize();
 
-	if (master_version()<VERSION2INT(2,0,0)) {
-		wptr = fs_createpacket(rec,CLTOMA_FUSE_LOOKUP,13+nleng);
-		packetver = 0;
-	} else {
-		wptr = fs_createpacket(rec,CLTOMA_FUSE_LOOKUP,13+4*gids+nleng);
-		packetver = 1;
-	}
-	if (wptr==NULL) {
-		return MFS_ERROR_IO;
-	}
-	put32bit(&wptr,parent);
-	put8bit(&wptr,nleng);
-	memcpy(wptr,name,nleng);
-	wptr+=nleng;
-	put32bit(&wptr,uid);
-	if (packetver==0) {
-		if (gids>0) {
-			put32bit(&wptr,gid[0]);
+	/* Rebuild + resend on MFS_ERROR_EAGAIN (master admission control under overload). */
+	for (eagain_try=0 ; eagain_try<4 ; eagain_try++) {
+		if (master_version()<VERSION2INT(2,0,0)) {
+			wptr = fs_createpacket(rec,CLTOMA_FUSE_LOOKUP,13+nleng);
+			packetver = 0;
 		} else {
-			put32bit(&wptr,0xFFFFFFFF);
+			wptr = fs_createpacket(rec,CLTOMA_FUSE_LOOKUP,13+4*gids+nleng);
+			packetver = 1;
 		}
-	} else {
-		if (gids>0) {
-			put32bit(&wptr,gids);
-			for (i=0 ; i<gids ; i++) {
-				put32bit(&wptr,gid[i]);
+		if (wptr==NULL) {
+			return MFS_ERROR_IO;
+		}
+		put32bit(&wptr,parent);
+		put8bit(&wptr,nleng);
+		memcpy(wptr,name,nleng);
+		wptr+=nleng;
+		put32bit(&wptr,uid);
+		if (packetver==0) {
+			if (gids>0) {
+				put32bit(&wptr,gid[0]);
+			} else {
+				put32bit(&wptr,0xFFFFFFFF);
 			}
 		} else {
-			put32bit(&wptr,0xFFFFFFFF);
+			if (gids>0) {
+				put32bit(&wptr,gids);
+				for (i=0 ; i<gids ; i++) {
+					put32bit(&wptr,gid[i]);
+				}
+			} else {
+				put32bit(&wptr,0xFFFFFFFF);
+			}
 		}
-	}
-	rptr = fs_sendandreceive(rec,MATOCL_FUSE_LOOKUP,&i);
-	if (rptr==NULL) {
-		ret = MFS_ERROR_IO;
-	} else if (i==1) {
-		ret = rptr[0];
-	} else if (i==(uint32_t)(4+asize) || i>=(uint32_t)(6+asize)) {
-		*inode = get32bit(&rptr);
-		copy_attr(rptr,attr,asize);
-		ret = MFS_STATUS_OK;
-	} else {
-		fs_disconnect();
-		ret = MFS_ERROR_IO;
+		rptr = fs_sendandreceive(rec,MATOCL_FUSE_LOOKUP,&i);
+		if (rptr==NULL) {
+			ret = MFS_ERROR_IO;
+			break;
+		} else if (i==1) {
+			ret = rptr[0];
+			if (fs_master_eagain_retry(ret, eagain_try)) {
+				continue;
+			}
+			break;
+		} else if (i==(uint32_t)(4+asize) || i>=(uint32_t)(6+asize)) {
+			*inode = get32bit(&rptr);
+			copy_attr(rptr,attr,asize);
+			ret = MFS_STATUS_OK;
+			break;
+		} else {
+			fs_disconnect();
+			ret = MFS_ERROR_IO;
+			break;
+		}
 	}
 	return ret;
 }

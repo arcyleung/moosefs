@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -164,7 +165,6 @@ typedef struct _fsnode {
 	union _data {
 		struct _ddata {				// type==TYPE_DIRECTORY
 			fsedge *children;
-			fsedge *childrentail;		// perf: O(1) append + creation-order iteration for large dirs (readdir scalability)
 			uint32_t nlink;
 			uint32_t elements;
 			statsrecord stats;
@@ -2382,7 +2382,7 @@ static inline uint32_t fsnodes_checkarchmode(fsnode *obj,uint32_t ts,uint8_t fie
 			arch_delay = sclass_get_arch_delay(obj->sclassid);
 			arch_min_size = sclass_get_arch_min_size(obj->sclassid);
 //			mfs_log(MFSLOG_SYSLOG,MFSLOG_DEBUG,"inode: %"PRIu32" ; classid: %"PRIu8" ; arch_delay: %"PRIu16" ; keepmode: %u ; arch_mode: 0x%02"PRIX8" ; to_check: 0x%02"PRIX8,obj->inode,obj->sclassid,arch_delay,obj->keepmode,arch_mode,fields_to_check);
-			if ((arch_mode & SCLASS_ARCH_MODE_REVERSIBLE) && ((arch_delay>0 || arch_min_size>0) && (arch_mode & fields_to_check))) {
+			if ((arch_mode & SCLASS_ARCH_MODE_REVERSIBLE) && ((arch_delay>0 && (arch_mode & fields_to_check)) || arch_min_size>0)) {
 				if (obj->data.fdata.length<arch_min_size) {
 					aflag = 0;
 				} else {
@@ -2461,17 +2461,6 @@ static inline void fsnodes_remove_edge(uint32_t ts,fsedge *e) {
 	if (e->nextchild) {
 		e->nextchild->prevchild = e->prevchild;
 	}
-	/* perf + correctness: maintain childrentail when removing from a dir's
-	   children list. */
-	if (e->parent && e->parent->data.ddata.childrentail == e) {
-		if (e->prevchild == &(e->parent->data.ddata.children)) {
-			e->parent->data.ddata.childrentail = NULL;
-		} else {
-			/* recover previous edge from the intrusive prev pointer */
-			fsedge *prev_e = (fsedge*)((uintptr_t)e->prevchild - offsetof(fsedge, nextchild));
-			e->parent->data.ddata.childrentail = prev_e;
-		}
-	}
 	*(e->prevparent) = e->nextparent;
 	if (e->nextparent) {
 		e->nextparent->prevparent = e->prevparent;
@@ -2498,20 +2487,12 @@ static inline void fsnodes_link(uint32_t ts,fsnode *parent,fsnode *child,uint16_
 	memcpy((uint8_t*)(e->name),name,nleng);
 	e->child = child;
 	e->parent = parent;
-	/* perf: append using tail (instead of always prepending). This gives
-	   readdir results in roughly creation order (better for humans + log
-	   dirs) and enables O(1) append for large directories. The prevchild
-	   pointers are already maintained for O(1) removal. */
-	if (parent->data.ddata.childrentail == NULL) {
-		parent->data.ddata.children = e;
-		e->prevchild = &(parent->data.ddata.children);
-	} else {
-		parent->data.ddata.childrentail->nextchild = e;
-		e->prevchild = &(parent->data.ddata.childrentail->nextchild);
+	e->nextchild = parent->data.ddata.children;
+	if (e->nextchild) {
+		e->nextchild->prevchild = &(e->nextchild);
 	}
-	e->nextchild = NULL;
-	parent->data.ddata.childrentail = e;
-
+	parent->data.ddata.children = e;
+	e->prevchild = &(parent->data.ddata.children);
 	e->nextparent = child->parents;
 	if (e->nextparent) {
 		e->nextparent->prevparent = &(e->nextparent);
@@ -2627,7 +2608,6 @@ fsnode* fsnodes_create_node(uint32_t ts,fsnode* node,uint16_t nleng,const uint8_
 		memset(&(p->data.ddata.stats),0,sizeof(statsrecord));
 		p->data.ddata.quota = NULL;
 		p->data.ddata.children = NULL;
-		p->data.ddata.childrentail = NULL;
 		p->data.ddata.nlink = 2;
 		p->data.ddata.elements = 0;
 		break;
@@ -3634,7 +3614,7 @@ static inline uint8_t fsnodes_undel(uint32_t ts,fsnode *node) {
 			}
 		}
 	}
-	if (partleng==0) {	// last part cannot be empty - it's the name of undeleted file
+	if (partleng==0) {	// last part canot be empty - it's the name of undeleted file
 		return MFS_ERROR_CANTCREATEPATH;
 	}
 	if (partleng==dots && partleng<=2) {	// '.' or '..' in path
@@ -6067,7 +6047,7 @@ uint8_t fs_univ_set_additional_attributes(uint32_t ts,uint32_t rootinode,uint8_t
 				curracl->namedusers = get16bit(&data);
 				curracl->namedgroups = get16bit(&data);
 				leng -= 12;
-				naclleng = ((uint32_t)(curracl->namedusers)+(uint32_t)(curracl->namedgroups))*6U;
+				naclleng = (curracl->namedusers+curracl->namedgroups)*6U;
 				if (leng<naclleng) {
 					return MFS_ERROR_EINVAL;
 				}
@@ -8217,9 +8197,6 @@ uint8_t fs_setfacl(uint32_t rootinode,uint8_t sesflags,uint32_t inode,uint32_t u
 			p->acldefflag = 0;
 		}
 	} else {
-		if (acltype==POSIX_ACL_DEFAULT && p->type!=TYPE_DIRECTORY) {
-			return MFS_ERROR_EACCES;
-		}
 		if (userperm==0xFFFF) {
 			userperm = (p->mode >> 6) & 7;
 		}
@@ -9683,7 +9660,7 @@ static inline int fs_loadedge(bio *fd,uint8_t mver,int ignoreflag) {
 					fsedge_free(e,nleng);
 					return -1;
 				}
-				// generate unique filename ???
+				// genrate unique filename ???
 				mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_NOTICE,"loading edge: %"PRIu32",%s->%"PRIu32" attaching node to root dir",parent_id,changelog_escape_name(e->nleng,e->name),child_id);
 				parent_id = MFS_ROOT_ID;
 			} else {
@@ -9705,7 +9682,7 @@ static inline int fs_loadedge(bio *fd,uint8_t mver,int ignoreflag) {
 					fsedge_free(e,nleng);
 					return -1;
 				}
-				// generate unique filename ???
+				// genrate unique filename ???
 				mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_NOTICE,"loading edge: %"PRIu32",%s->%"PRIu32" attaching node to root dir",parent_id,changelog_escape_name(e->nleng,e->name),child_id);
 				parent_id = MFS_ROOT_ID;
 			} else {
@@ -10054,7 +10031,6 @@ static inline int fs_loadnode(bio *fd,uint8_t mver,int ignoreflag,uint8_t *unode
 		memset(&(p->data.ddata.stats),0,sizeof(statsrecord));
 		p->data.ddata.quota = NULL;
 		p->data.ddata.children = NULL;
-		p->data.ddata.childrentail = NULL;
 		p->data.ddata.nlink = 2;
 		p->data.ddata.elements = 0;
 		break;

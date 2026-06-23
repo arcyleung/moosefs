@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifndef _HASHFN_H_
@@ -139,7 +140,7 @@ static inline uint64_t hashstr_murmur64(const char *key,uint64_t hash) {
 /* fast integer hash functions by Thomas Wang */
 /* all of them pass the avalanche test */
 
-/* They are not much better in standard collision test than stupid "X*prime"
+/* They are not mutch better in standard collision test than stupid "X*prime"
  * functions, but calculation times are similar, so it should be safer to use
  * this functions */
 

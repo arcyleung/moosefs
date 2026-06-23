@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #include <stdio.h>
@@ -102,7 +103,7 @@ error:
 //----------------------------------------------------------------------
 
 static const char *checkarchivetxt[] = {
-	"checks if archive flag is set or not (when directory is specified then command will check it recursively)",
+	"checks if archive flag is set or not (when directory is specified then command will check it recursivelly)",
 	"",
 	"usage: "_EXENAME_" [-?] [-nhHkmg] object [object ...]",
 	"",
@@ -112,7 +113,7 @@ static const char *checkarchivetxt[] = {
 };
 
 static const char *setarchivetxt[] = {
-	"set archive flags in chunks (recursively for directories) - moves files to archive (use 'archive' goal/labels instead of 'keep' goal/labels)",
+	"set archive flags in chunks (recursivelly for directories) - moves files to archive (use 'archive' goal/labels instead of 'keep' goal/labels)",
 	"",
 	"usage: "_EXENAME_" [-?] [-nhHkmg] object [object ...]",
 	"",
@@ -122,7 +123,7 @@ static const char *setarchivetxt[] = {
 };
 
 static const char *clrarchivetxt[] = {
-	"clear archive flags in chunks (recursively for directories) - moves files from archive (use 'keep' goal/labels instead of 'archive' goal/labels) - it also changes ctime, so files will move back to archive after time specified in mfssetgoal",
+	"clear archive flags in chunks (recursivelly for directories) - moves files from archive (use 'keep' goal/labels instead of 'archive' goal/labels) - it also changes ctime, so files will move back to archive after time specified in mfssetgoal",
 	"",
 	"usage: "_EXENAME_" [-?] [-nhHkmg] object [object ...]"
 	"",

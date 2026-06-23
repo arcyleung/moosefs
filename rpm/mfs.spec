@@ -22,10 +22,6 @@
 %global _enable_debug_package 0
 %global debug_package %{nil}
 
-# Turn off lto
-%global _lto_cflags %{nil}
-%global _lto_ldflags %{nil}
-
 # Turn off strip'ng of binaries
 %global __os_install_post %{nil}
 
@@ -38,9 +34,9 @@
 
 Summary:	MooseFS - distributed, fault tolerant file system
 Name:		moosefs
-Version:	4.59.2
+Version:	4.58.1
 Release:	1%{?_relname}
-License:	GPL-2.0-only
+License:	commercial
 Group:		System Environment/Daemons
 URL:		http://www.moosefs.com/
 Source0:	%{name}-%{version}.tar.gz
@@ -108,7 +104,7 @@ Summary:	MooseFS client
 Group:		System Environment/Daemons
 
 %description client
-MooseFS client: mounting tool, block device manager and various utilities.
+MooseFS client: mfsmount and mfstools.
 
 
 
@@ -153,6 +149,7 @@ MooseFS web-based GUI.
 %package netdump
 Summary:	MooseFS network packet dump utility
 Group:		System Environment/Daemons
+Requires:	libpcap
 
 %description netdump
 MooseFS network packet dump utility
@@ -443,9 +440,9 @@ exit 0
 %{_bindir}/mfscreatepattern
 %{_bindir}/mfsdeletepattern
 %{_bindir}/mfslistpattern
-%attr(755,root,root) %{_bindir}/mfsgetgoal
-%attr(755,root,root) %{_bindir}/mfssetgoal
-%attr(755,root,root) %{_bindir}/mfscopygoal
+%{_bindir}/mfsgetgoal
+%{_bindir}/mfssetgoal
+%{_bindir}/mfscopygoal
 %attr(755,root,root) %{_bindir}/mfsdiagtools
 %attr(755,root,root) %{_bindir}/mfssnapshots
 %attr(755,root,root) %{_bindir}/mfsfacl
@@ -466,7 +463,7 @@ exit 0
 %{_libdir}/libmfsio.la
 %{_libdir}/libmfsio.so
 %{_libdir}/libmfsio.so.1
-%attr(755,root,root) %{_libdir}/libmfsio.so.1.0.0
+%{_libdir}/libmfsio.so.1.0.0
 %{_mandir}/man1/mfscheckfile.1*
 %{_mandir}/man1/mfsdirinfo.1*
 %{_mandir}/man1/mfsfileinfo.1*
@@ -582,12 +579,6 @@ exit 0
 
 
 %changelog
-* Wed Nov 19 2025 Jakub Kruszona-Zawadzki <contact@moosefs.com> - 4.58.3-1
-- turn off lto
-- fixed file attributes (mfs*goal and libmfsio.so.1.0.0)
-- fixed mfsclient description
-- removed unnecessary libpcap dependency
-
 * Thu Jun 05 2025 Jakub Kruszona-Zawadzki <contact@moosefs.com> - 4.56.7-1
 - new package gui (replaces cgi and deprecates cgiserv), removed cgiserv
 
@@ -600,7 +591,7 @@ exit 0
 * Wed Oct 15 2014 Jakub Kruszona-Zawadzki <contact@moosefs.com> - 2.0.40-1
 - fixed paths in systemd/*.service files
 
-* Tue Jun 03 2014 Jakub Kruszona-Zawadzki <contact@moosefs.com> - 2.0.10-1
+* Tue Jun  3 2014 Jakub Kruszona-Zawadzki <contact@moosefs.com> - 2.0.10-1
 - added new package: mfsnetdump
 
 * Thu Feb 20 2014 Jakub Kruszona-Zawadzki <contact@moosefs.com> - 1.7.25-1
@@ -633,7 +624,7 @@ exit 0
 * Fri Nov 19 2010 Jakub Bogusz <contact@moosefs.com> - 1.6.19-1
 - separated metalogger subpackage (following Debian packaging)
 
-* Fri Oct 08 2010 Jakub Bogusz <contact@moosefs.com> - 1.6.17-1
+* Fri Oct  8 2010 Jakub Bogusz <contact@moosefs.com> - 1.6.17-1
 - added init scripts based on work of Steve Huff (Dag Apt Repository)
   (included in RPMs when building with --define "distro rh")
 

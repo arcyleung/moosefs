@@ -1,4 +1,4 @@
-.TH mfstopology.cfg "5" "May 2026" "MooseFS 4.59.2-1" "This is part of MooseFS"
+.TH mfstopology.cfg "5" "October 2025" "MooseFS 4.58.1-1" "This is part of MooseFS"
 .ss 12 0
 .SH NAME
 mfstopology.cfg \- MooseFS network topology definitions
@@ -45,7 +45,7 @@ Distance is used for the following purposes:
 .br
 Copies of chunks are sent to the client(mount) sorted by the distance from this client when a chunk is needed for I/O operations. Notice that
 the client may alter that order based on internal settings (preferred labels or internal congestion preventing algorithms; for
-more information about preferred labels refer to \fBmfsmount\fP\|(8) manual).
+more informations about preferred labels refer to \fBmfsmount\fP\|(8) manual).
 .br
 In the master the distance and racks information is used when \fBCREATIONS_RESPECT_TOPOLOGY\fP 
 and/or \fBREPLICATIONS_RESPECT_TOPOLOGY\fP are set to value greater than 0. 
@@ -75,7 +75,7 @@ d('US|PHOENIX|AT&T|RACK1','US|ATM') = 4
 .PP
 d('US|PHOENIX|AT&T|RACK1','DE|BERLIN|ATM|RACK175') = 5
 .SH COPYRIGHT
-Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 
 This file is part of MooseFS.
 
@@ -89,8 +89,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, see
-<https://www.gnu.org/licenses/>.
+along with MooseFS; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+or visit http://www.gnu.org/licenses/gpl-2.0.html
 .SH "SEE ALSO"
 .BR mfsmaster (8),
 .BR mfsmaster.cfg (5)

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.63)
-AC_INIT([MFS], [4.59.2], [bugs@moosefs.com], [moosefs])
+AC_INIT([MFS], [4.58.1], [bugs@moosefs.com], [moosefs])
 release=1
 buildno=$(cat buildno.txt)
 
@@ -144,10 +144,6 @@ case $target_os in
 	CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 	;;
 esac
-
-AC_ARG_WITH([rootsbindir],
-	[AS_HELP_STRING([--with-rootsbindir=PATH], [Path to install mount.moosefs])],
-	[root_sbindir="${withval}"])
 
 AC_SUBST([root_sbindir])
 
@@ -365,7 +361,7 @@ typeof(ioctl) prototest;
 int prototest(int x,int y ,...) { return x+y; }
 	])],[
 		AC_MSG_RESULT([yes])
-		AC_DEFINE([IOCTL_INTOP], [1], [ioctl operation argument is of type int])
+		AC_DEFINE([IOCTL_INTOP], [1], [ioclt operation argument is of type int])
 	],[
 		AC_MSG_RESULT([no])
 	])
@@ -479,11 +475,6 @@ else
 	echo "no pkg-config - can't check systemd systemunitdir"
 	systemdunitdir=
 fi
-
-AC_ARG_WITH([systemdsystemunitdir],
-	[AS_HELP_STRING([--with-systemdsystemunitdir=PATH], [Path to install systemd units (no=omit)])],
-	[systemdunitdir="${withval}"])
-
 AC_SUBST([systemdunitdir])
 
 dnl this is work in progress
@@ -539,18 +530,21 @@ AC_ARG_WITH([zlib],
 	[AS_HELP_STRING([--without-zlib], [Do not use zlib for PNG compression])],
 	[use_zlib="${withval}"],
 	[use_zlib=yes])
+AC_ARG_WITH([systemdsystemunitdir],
+	[AS_HELP_STRING([--with-systemdsystemunitdir=PATH], [Path to install systemd units (no=omit)])],
+	[systemdunitdir="${withval}"])
 
 AM_CONDITIONAL([WITH_SYSTEMD], [test "$systemdunitdir" != "no"])
 
 if test "$enable_mfscgi" != "no" -o "$enable_mfscli" != "no"; then
-	AM_PATH_PYTHON([3.4],,[
-		echo "****** mfscli and gui disabled ******"
-		echo "* mfscli and gui need python >= 3.4 *"
-		echo "*************************************"
-		enable_mfsgui=no
-		enable_mfscgi=no
-		enable_mfscli=no
-	])
+	dnl AM_PATH_PYTHON([3.4],,[:])
+	AC_CHECK_PROGS(PYTHON, [python3 python python3.13 pytnon3.12 python3.11 python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4], [:])
+	if test "$PYTHON" = :; then
+		PYTHON="python"
+		AC_MSG_RESULT([Python binary not found !!! - using default in shebangs])
+	else
+		AC_MSG_RESULT([Python binary for script shebangs: $PYTHON])
+	fi
 fi
 
 AM_CONDITIONAL([WITH_PYTHON], [test "$enable_mfscgi" != "no" -o "$enable_mfscli" != "no"])

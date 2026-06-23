@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -428,7 +429,7 @@ static void mfs_resize_fd(void) {
 	for (i=fdtabsize ; i<newfdtabsize ; i++) {
 		mfs_fi_init(fdtab+i);
 	}
-	i = (fdtabsize+31)/32;
+	i = fdtabsize+31/32;
 	memset(fdtabusemask+i,0,sizeof(uint32_t)*(((newfdtabsize+31)/32)-i));
 	if ((fdtabsize&0x1F)!=0) {
 		fdtabusemask[i-1] &= (0xFFFFFFFF >> (0x20-(fdtabsize&0x1F)));

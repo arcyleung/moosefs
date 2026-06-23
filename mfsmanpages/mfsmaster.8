@@ -1,4 +1,4 @@
-.TH mfsmaster "8" "May 2026" "MooseFS 4.59.2-1" "This is part of MooseFS"
+.TH mfsmaster "8" "October 2025" "MooseFS 4.58.1-1" "This is part of MooseFS"
 .ss 12 0
 .SH NAME
 mfsmaster \- start, restart or stop MooseFS master process
@@ -76,13 +76,13 @@ Stop master process if the process is running, otherwise display error message.
 .IP reload
 Send a signal to master process to reload config files.
 .IP info
-Send a signal to master process to dump debug information file in working directory.
+Send a singal to master process to dump debug information file in working directory.
 .IP test
 Displays "mfsmaster pid: PID" if the master is running (and return 0) or  "mfsmaster is not running" otherwise (and return 1).
 .IP kill
 Send termination signal to master process.
 .IP restore
-Restore current metadata file using backup metadata and changelog files (if possible, i.e. if correct files exist), write it to working directory and exit.
+Restore current metadata file using backup metadata and changlog files (if possible, i.e. if correct files exist), write it to working directory and exit.
 .RE
 .SH FILES
 .TP
@@ -127,7 +127,7 @@ master info file, created by sending the process INFO signal, with work paramete
 .SH "REPORTING BUGS"
 Report bugs to <bugs@moosefs.com>.
 .SH COPYRIGHT
-Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 
 This file is part of MooseFS.
 
@@ -141,8 +141,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, see
-<https://www.gnu.org/licenses/>.
+along with MooseFS; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+or visit http://www.gnu.org/licenses/gpl-2.0.html
 .SH "SEE ALSO"
 .BR mfschunkserver (8),
 .BR mfsmount (8),

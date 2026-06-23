@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #include <stdio.h>
@@ -465,7 +466,7 @@ int change_sc(const char *mfsmp, const char *scname, uint16_t chgmask, storage_c
 		goto error;
 	}
 	if (deserialize_sc_new(protocol, leng-1, sc) < 0) {
-		fprintf(stderr,"master query: wrong answer (deserialize storage class)\n");
+		fprintf(stderr,"master query: wrong answer (deserialize stoage class)\n");
 		goto error;
 	}
 //OK
@@ -798,7 +799,7 @@ int make_or_change_sc(const char *mfsmp,const char *scname,storage_class *sc,uin
 			}
 			if (leng==1) {
 				mfsstatus = ps_get8();
-				fprintf(stderr,"error overwriting storage class %s: %s\n",scname,mfsstrerr(mfsstatus));
+				fprintf(stderr,"error overwritting storage class %s: %s\n",scname,mfsstrerr(mfsstatus));
 				goto error;
 			}
 			if (ps_get8() != protocol) {
@@ -806,7 +807,7 @@ int make_or_change_sc(const char *mfsmp,const char *scname,storage_class *sc,uin
 				goto error;
 			}
 			if (deserialize_sc_new(protocol, leng-1, sc) < 0) {
-				fprintf(stderr,"master query: wrong answer (deserialize storage class)\n");
+				fprintf(stderr,"master query: wrong answer (deserialize stoage class)\n");
 				goto error;
 			}
 			printf("storage class %s has been overwritten\n",scname);
@@ -1088,7 +1089,7 @@ static const char *createmodifysctxt[] = {
 	"",
 	"Options '-d' and '-t' can be defined as a number of hours (integer) or a time period in one of two possible formats:",
 	"first format: #.#T where T is one of: h-hours, d-days or w-weeks; fractions of hours will be rounded to full hours",
-	"second format: #w#d#h, any number of definitions can be omitted, but the remaining definitions must be in order (so #w#h is still a valid definition, but #d#w is not);",
+	"second format: #w#d#h, any number of definitions can be ommited, but the remaining definitions must be in order (so #w#h is still a valid definition, but #d#w is not);",
 	"ranges: h: 0 to 23, d: 0 to 6, w is unlimited and the first definition is also always unlimited (i.e. for #d#h d will be unlimited)",
 	NULL
 };
@@ -1403,10 +1404,6 @@ int check_arch_mode(uint8_t arch_mode) {
 		fprintf(stderr,"Fast arch mode ('F') is mutually exclusive with all other arch modes\n");
 		return -1;
 	}
-	if ((arch_mode & SCLASS_ARCH_MODE_REVERSIBLE) && (arch_mode & (SCLASS_ARCH_MODE_CTIME|SCLASS_ARCH_MODE_MTIME|SCLASS_ARCH_MODE_ATIME))==0) {
-		fprintf(stderr,"Reversible arch mode ('R') needs at least one time flag ('A','M' or 'C')\n");
-		return -1;
-	}
 	return 0;
 }
 
@@ -1560,6 +1557,7 @@ int modifyscexe(int argc,char *argv[]) {
 		modifyscusage();
 		return 1;
 	}
+
 
 	if (argc==0) {
 		modifyscusage();

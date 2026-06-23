@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+# Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 # 
 # This file is part of MooseFS.
 # 
@@ -14,8 +14,9 @@
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, see
-# <https://www.gnu.org/licenses/>.
+# along with MooseFS; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+# or visit http://www.gnu.org/licenses/gpl-2.0.html
 
 import os
 import sys
@@ -1019,7 +1020,7 @@ cl = Cluster(masterhost, masterport)
 
 errmsg = None
 if cl.master()==None:
-	errmsg = cl.errormsg()
+	errmsg = """Can't connect to the MooseFS Master server (%s)""" % (masterhost)
 if (cl.leaderfound() or cl.electfound() or cl.usurperfound() or cl.followerfound()):
 	if cl.master().version_unknown():
 		errmsg = """Can't detect the MooseFS Master server version (%s)""" % (masterhost)
@@ -2457,7 +2458,7 @@ if org.shall_render("MB"):
 if org.shall_render("HD"):
 	try:
 		(hdds, scanhdds) = dataprovider.get_hdds("ALL", HDperiod, HDtime, HDorder, HDrev)
-		# prepare headers
+		# preapare headers
 		if len(hdds)>0 or len(scanhdds)>0:
 			if jsonmode:
 				json_hd_array = []

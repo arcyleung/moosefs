@@ -1,4 +1,4 @@
-VERSION = "4.59.2"
+VERSION = "4.58.1"
 
 PROTO_BASE = 0
 
@@ -6,4 +6,4 @@ DEFAULT_MASTERNAME          = "mfsmaster"
 DEFAULT_MASTER_CLIENT_PORT  = 9421
 DEFAULT_MASTER_CONTROL_PORT = 9419
 
-BIN_PATH = "/tmp/mfs-test/bin"
+BIN_PATH = "/usr/local/bin"

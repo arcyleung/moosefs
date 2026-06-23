@@ -1,59 +1,3 @@
-moosefs (4.59.2-1) unstable; urgency=medium
-
-  * (cs) fixed bug preventing background chunk testing
-
- -- MooseFS Team <contact@moosefs.com>  Thu, 14 May 2026 13:00:00 +0200
-
-moosefs (4.59.1-1) unstable; urgency=medium
-
-  * (cs) fixed potential OOB read
-
- -- MooseFS Team <contact@moosefs.com>  Mon, 04 May 2026 13:00:00 +0200
-
-moosefs (4.59.0-1) unstable; urgency=medium
-
-  * (all) changed licence handling (pro only)
-  * (all) fixed some security issues
-
- -- MooseFS Team <contact@moosefs.com>  Thu, 23 Apr 2026 13:00:00 +0200
-
-moosefs (4.58.5-1) unstable; urgency=medium
-
-  * (cs) removed aggresive fadvise calls
-
- -- MooseFS Team <contact@moosefs.com>  Wed, 01 Apr 2026 13:00:00 +0200
-
-moosefs (4.58.4-1) unstable; urgency=medium
-
-  * (all) added spec files for Fedora, changed autogen.sh to bootstrap.sh
-  * (all) added 'printflike' macro to mfslog, fixed all printflike macros,
-    fixed some syslog args
-  * (common) silenced address sanitizer unnecessary warning
-  * (common) fixed masterresolver (potential segfault when the last name was
-    empty - pro only)
-  * (common) added protection against double initialization of strerr
-  * (master) added expected chunk versions to syslog messages
-
- -- MooseFS Team <contact@moosefs.com>  Wed, 18 Mar 2026 12:00:00 +0100
-
-moosefs (4.58.3-1) unstable; urgency=medium
-
-  * (master+tools) fixed conditions for reversible storage class
-  * (daemons) fixed small security issue (clearing auxiliary groups before
-    setuid)
-  * (libmfsio) fixed descriptor resize function
-
- -- MooseFS Team <contact@moosefs.com>  Mon, 15 Dec 2025 12:00:00 +0100
-
-moosefs (4.58.2-1) unstable; urgency=medium
-
-  * (master) changed timeouts used in master to master connections (pro only)
-  * (client) fixed test for overlapping requests in read-ahead algorithm (pull
-    request by Chuandev)
-  * (all) fixed typos and spelling errors
-
- -- MooseFS Team <contact@moosefs.com>  Mon, 03 Nov 2025 12:00:00 +0100
-
 moosefs (4.58.1-1) unstable; urgency=medium
 
   * (master) fix for segfault in flocklocks.c
@@ -401,7 +345,7 @@ moosefs (4.49.0-1) unstable; urgency=medium
 
 moosefs (4.48.1-1) unstable; urgency=medium
 
-  * (master) fixed trashflag handling for snapshotted chunks (bug intr. in
+  * (master) fixed trashflag handling for snapshoted chunks (bug intr. in
     4.46.0)
 
  -- MooseFS Team <contact@moosefs.com>  Fri, 21 Jul 2023 13:00:00 +0200
@@ -855,7 +799,7 @@ moosefs (4.34.0-1) unstable; urgency=medium
   * (master) made chunks always readable after 'mfsfilerepair' (will return
     zeros when chunks are missing)
   * (master) fixed logical error (master without metadata could become ELECT
-    and then LEADER which led to segfault)
+    and then LEADER which leaded to segfault)
   * (all) new feature: minimum file length needed for being moved from KEEP to
     ARCH mode in storage class
 
@@ -1757,7 +1701,7 @@ moosefs (4.12.2-1) unstable; urgency=medium
   * (client) added ignoring '_netdev' option - sometimes needed in case of
     mounting from fstab
   * (master) added defining rackid as string paths in mfstopology.cfg
-    (introduced optional higher distances between servers)
+    (introdiced optional higher distances between servers)
   * (master) fixed desync on adding damaged chunk
   * (master) added changelog save mode (in background,asynchronous and
     synchronous)
@@ -2175,7 +2119,7 @@ moosefs (4.0.1-1) unstable; urgency=medium
 moosefs (4.0.0-1) unstable; urgency=medium
 
   * (all) added erasure codes
-  * (tools) added new commands 'mfsXXXtrashretention' (deprecate
+  * (tools) added new commands 'mfsXXXtrashretention' (deperecate
     mfsXXXtrashtime commands)
   * (tools) added new commands 'mfsXXXfacl' for managing ACL's on non-Linux
     OS'es

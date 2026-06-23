@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #include <stdio.h>
@@ -260,7 +261,7 @@ static const char *setquotatxt[] = {
 	"",
 	"Grace period can be defined as a number of seconds (integer) or a time period in one of two possible formats:",
 	"first format: #.#T where T is one of: s-seconds, m-minutes, h-hours, d-days or w-weeks; fractions of seconds will be rounded to full seconds",
-	"second format: #w#d#h#m#s, any number of definitions can be omitted, but the remaining definitions must be in order (so #d#m is still a valid definition, but #m#d is not);",
+	"second format: #w#d#h#m#s, any number of definitions can be ommited, but the remaining definitions must be in order (so #d#m is still a valid definition, but #m#d is not);",
 	"ranges: s,m: 0 to 59, h: 0 to 23, d: 0 to 6, w is unlimited and the first definition is also always unlimited (i.e. for #d#h#m d will be unlimited)",
 	"",
 	"All numbers can have decimal point and SI/IEC symbol prefix at the end",

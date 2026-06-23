@@ -1,43 +1,5 @@
 This file lists noteworthy changes in MooseFS.
 
-* MooseFS 4.59.2-1 (2026-05-14)
-
-  - (cs) fixed bug preventing background chunk testing
-
-* MooseFS 4.59.1-1 (2026-05-04)
-
-  - (cs) fixed potential OOB read
-
-* MooseFS 4.59.0-1 (2026-04-23)
-
-  - (all) changed licence handling (pro only)
-  - (all) fixed some security issues
-
-* MooseFS 4.58.5-1 (2026-04-01)
-
-  - (cs) removed aggresive fadvise calls
-
-* MooseFS 4.58.4-1 (2026-03-18)
-
-  - (all) added spec files for Fedora, changed autogen.sh to bootstrap.sh
-  - (all) added 'printflike' macro to mfslog, fixed all printflike macros, fixed some syslog args
-  - (common) silenced address sanitizer unnecessary warning
-  - (common) fixed masterresolver (potential segfault when the last name was empty - pro only)
-  - (common) added protection against double initialization of strerr
-  - (master) added expected chunk versions to syslog messages
-
-* MooseFS 4.58.3-1 (2025-12-15)
-
-  - (master+tools) fixed conditions for reversible storage class
-  - (daemons) fixed small security issue (clearing auxiliary groups before setuid)
-  - (libmfsio) fixed descriptor resize function
-
-* MooseFS 4.58.2-1 (2025-11-03)
-
-  - (master) changed timeouts used in master to master connections (pro only)
-  - (client) fixed test for overlapping requests in read-ahead algorithm (pull request by Chuandev)
-  - (all) fixed typos and spelling errors
-
 * MooseFS 4.58.1-1 (2025-09-29)
 
   - (master) fix for segfault in flocklocks.c
@@ -285,7 +247,7 @@ This file lists noteworthy changes in MooseFS.
 
 * MooseFS 4.48.1-1 (2023-07-21)
 
-  - (master) fixed trashflag handling for snapshotted chunks (bug intr. in 4.46.0)
+  - (master) fixed trashflag handling for snapshoted chunks (bug intr. in 4.46.0)
 
 * MooseFS 4.48.0-1 (2023-05-29)
 
@@ -579,7 +541,7 @@ This file lists noteworthy changes in MooseFS.
 * MooseFS 4.34.0-1 (2021-08-27)
 
   - (master) made chunks always readable after 'mfsfilerepair' (will return zeros when chunks are missing)
-  - (master) fixed logical error (master without metadata could become ELECT and then LEADER which led to segfault)
+  - (master) fixed logical error (master without metadata could become ELECT and then LEADER which leaded to segfault)
   - (all) new feature: minimum file length needed for being moved from KEEP to ARCH mode in storage class
 
 * MooseFS 4.33.2-1 (2021-08-20)
@@ -1180,7 +1142,7 @@ This file lists noteworthy changes in MooseFS.
 * MooseFS 4.12.2-1 (2019-01-30)
 
   - (client) added ignoring '_netdev' option - sometimes needed in case of mounting from fstab
-  - (master) added defining rackid as string paths in mfstopology.cfg (introduced optional higher distances between servers)
+  - (master) added defining rackid as string paths in mfstopology.cfg (introdiced optional higher distances between servers)
   - (master) fixed desync on adding damaged chunk
   - (master) added changelog save mode (in background,asynchronous and synchronous)
 
@@ -1456,7 +1418,7 @@ This file lists noteworthy changes in MooseFS.
 * MooseFS 4.0.0-1 (2017-02-23)
 
   - (all) added erasure codes
-  - (tools) added new commands 'mfsXXXtrashretention' (deprecate mfsXXXtrashtime commands)
+  - (tools) added new commands 'mfsXXXtrashretention' (deperecate mfsXXXtrashtime commands)
   - (tools) added new commands 'mfsXXXfacl' for managing ACL's on non-Linux OS'es
   - (master) added new storage mode (trash) in storage classes
 

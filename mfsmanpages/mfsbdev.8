@@ -1,4 +1,4 @@
-.TH mfsbdev "8" "May 2026" "MooseFS 4.59.2-1" "This is part of MooseFS"
+.TH mfsbdev "8" "October 2025" "MooseFS 4.58.1-1" "This is part of MooseFS"
 .ss 12 0
 .SH NAME
 mfsbdev \- \fBMooseFS\fP block device daemon/management tool
@@ -121,7 +121,7 @@ of the file the block device is mapped to
 .PP
 .B -i (map)
 - ignore locks; one file may be mapped to more than one block device, each map operation will try 
-to obtain the appropriate lock (shared for ro, exclusive for rw) but will succeed even if 
+to obtain the appropriate lock (shared for ro, exclusive for rw) but will succed even if 
 the lock is not obtained
 .PP
 .B -t
@@ -205,7 +205,7 @@ configuration file for MooseFS block device daemon; refer to \fBmfsbdev.cfg\fP\|
 .SH "REPORTING BUGS"
 Report bugs to <bugs@moosefs.com>.
 .SH COPYRIGHT
-Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
 
 This file is part of MooseFS.
 
@@ -219,8 +219,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, see
-<https://www.gnu.org/licenses/>.
+along with MooseFS; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+or visit http://www.gnu.org/licenses/gpl-2.0.html
 .SH "SEE ALSO"
 .BR mfsmount (8),
 .BR mfsbdev.cfg (5)

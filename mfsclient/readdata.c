@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -85,14 +86,14 @@
 
 #define BUFFER_VALIDITY_TIMEOUT 60.0
 
-#define SUSTAIN_WORKERS 64   /* perf: raised sustain for better baseline parallelism on multi-core clients */
-#define HEAVYLOAD_WORKERS 200  /* perf: allow more workers under heavy read load (see plan client data path) */
-#define MAX_WORKERS 320        /* perf: higher ceiling for very wide concurrent read workloads */
+#define SUSTAIN_WORKERS 50
+#define HEAVYLOAD_WORKERS 150
+#define MAX_WORKERS 250
 
 #define IDHASHSIZE 256
 #define IDHASH(inode) (((inode)*0xB239FB71)%IDHASHSIZE)
 
-#define READAHEAD_MAX 8  /* perf: increased from 4 for better sequential read throughput on modern networks/storage (plan item client data path) */
+#define READAHEAD_MAX 4
 
 /*
 typedef struct cblock_s {
@@ -805,7 +806,7 @@ void* read_worker(void *arg) {
 // MFS_ERROR_ENOENT - internal error (wrong inode - can't be repaired)
 // MFS_ERROR_EPERM - internal error (wrong inode - can't be repaired)
 // MFS_ERROR_INDEXTOOBIG - requested file position is too big
-// MFS_ERROR_CHUNKLOST - according to master chunk is definitely lost (all chunkservers are connected and chunk is not there)
+// MFS_ERROR_CHUNKLOST - according to master chunk is definitelly lost (all chunkservers are connected and chunk is not there)
 // statuses that are here just in case:
 // MFS_ERROR_QUOTA (used in write only)
 // MFS_ERROR_NOSPACE (used in write only)
@@ -1654,14 +1655,6 @@ void* read_worker(void *arg) {
 										status = EIO;
 										resetpos = 1; // start again from beginning
 										break;
-									} else if (datasrc[part].recleng>20+MFSCHUNKSIZE) {
-										mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"readworker: got too long data packet from chunkserver (leng:%"PRIu32")",datasrc[part].recleng);
-#ifdef RDEBUG
-										RDEBUG_READWORKER("got too long data packet from chunkserver (leng:%"PRIu32")",datasrc[part].recleng)
-#endif
-										status = EIO;
-										resetpos = 1; // start again from beginning
-										break;
 									} else if ((datasrc[part].recleng-20) + datasrc[part].currpos > datasrc[part].endpos) {
 										mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"readworker: got too long data packet from chunkserver (leng:%"PRIu32")",datasrc[part].recleng);
 #ifdef RDEBUG
@@ -2409,8 +2402,8 @@ int read_data(void *vid, uint64_t offset, uint32_t *size, void **vrhead,struct i
 								sassert(blockend>blockstart);
 								raok = 1;
 								for (rreqn = ind->reqhead ; rreqn && raok ; rreqn=rreqn->next) {
-									if (!STATE_NOT_NEEDED(rreqn->mode)) {
-										if (!(blockend <= rreqn->offset || blockstart >= rreqn->offset+rreqn->leng)) {
+									if (!STATE_NOT_NEEDED(rreq->mode)) {
+										if (!(blockend <= rreq->offset || blockstart >= rreq->offset+rreq->leng)) {
 											raok = 0;
 										}
 									}
@@ -2433,8 +2426,8 @@ int read_data(void *vid, uint64_t offset, uint32_t *size, void **vrhead,struct i
 										sassert(blockend>blockstart);
 										raok = 1;
 										for (rreqn = ind->reqhead ; rreqn && raok ; rreqn=rreqn->next) {
-											if (!STATE_NOT_NEEDED(rreqn->mode)) {
-												if (!(blockend <= rreqn->offset || blockstart >= rreqn->offset+rreqn->leng)) {
+											if (!STATE_NOT_NEEDED(rreq->mode)) {
+												if (!(blockend <= rreq->offset || blockstart >= rreq->offset+rreq->leng)) {
 													raok = 0;
 												}
 											}
@@ -2478,8 +2471,8 @@ int read_data(void *vid, uint64_t offset, uint32_t *size, void **vrhead,struct i
 						sassert(blockend>blockstart);
 						raok = 1;
 						for (rreqn = ind->reqhead ; rreqn && raok ; rreqn=rreqn->next) {
-							if (!STATE_NOT_NEEDED(rreqn->mode)) {
-								if (!(blockend <= rreqn->offset || blockstart >= rreqn->offset+rreqn->leng)) {
+							if (!STATE_NOT_NEEDED(rreq->mode)) {
+								if (!(blockend <= rreq->offset || blockstart >= rreq->offset+rreq->leng)) {
 									raok = 0;
 								}
 							}

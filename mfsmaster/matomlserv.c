@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -56,7 +57,6 @@
 
 #define MaxPacketSize ANTOMA_MAXPACKETSIZE
 
-#define ML_META_DL_BLOCK ((((MATOAN_MAXPACKETSIZE) - 1000) < 1000000) ? ((MATOAN_MAXPACKETSIZE) - 1000) : 1000000)
 
 #define OLD_CHANGES_GROUP_COUNT 10000
 
@@ -144,7 +144,6 @@ static uint32_t listenip;
 static uint16_t listenport;
 static uint32_t DefaultTimeout;
 static uint32_t ForceTimeout;
-
 
 
 static uint32_t BackMetaCopies;
@@ -348,15 +347,7 @@ void matomlserv_get_config(matomlserventry *eptr,const uint8_t *data,uint32_t le
 	}
 	memcpy(name,data,nleng);
 	name[nleng] = 0;
-	if (strcmp(name,"AUTH_CODE")==0) {
-		if (cfg_isdefined(name)) {
-			val = strdup("[DEFINED]");
-		} else {
-			val = NULL;
-		}
-	} else {
-		val = cfg_getdefaultstr(name);
-	}
+	val = cfg_getdefaultstr(name);
 	if (val!=NULL) {
 		vleng = strlen(val);
 		if (vleng>255) {
@@ -407,11 +398,7 @@ void matomlserv_get_config_file(matomlserventry *eptr,const uint8_t *data,uint32
 	}
 	memcpy(name,data,nleng);
 	name[nleng] = 0;
-	if (strcmp(name,"LICENCE_FILENAME")==0) {
-		fdata = cfg_getdefaultfile(name,65535);
-	} else {
-		fdata = NULL;
-	}
+	fdata = cfg_getdefaultfile(name,65535);
 	if (fdata==NULL) {
 		ptr = matomlserv_create_packet(eptr,ANTOAN_CONFIG_FILE_CONTENT,5);
 		put32bit(&ptr,msgid);
@@ -429,7 +416,7 @@ void matomlserv_syslog(matomlserventry *eptr,const uint8_t *data,uint32_t length
 	uint8_t priority;
 	uint32_t timestamp;
 	uint16_t msgsize;
-	if (length<7) {
+	if (length<3) {
 		mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"ANTOMA_SYSLOG - wrong size (%"PRIu32"/>=7)",length);
 		eptr->mode = KILL;
 		return;
@@ -437,7 +424,7 @@ void matomlserv_syslog(matomlserventry *eptr,const uint8_t *data,uint32_t length
 	priority = get8bit(&data);
 	timestamp = get32bit(&data);
 	msgsize = get16bit(&data);
-	if (length!=7U+msgsize) {
+	if (length!=3U+msgsize) {
 		mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"ANTOMA_SYSLOG - wrong size (%"PRIu32"/7+msgsize(%"PRIu16"))",length,msgsize);
 		eptr->mode = KILL;
 		return;
@@ -464,7 +451,7 @@ void matomlserv_register(matomlserventry *eptr,const uint8_t *data,uint32_t leng
 	} else {
 		rversion = get8bit(&data);
 		if (rversion==3) {
-			mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"ANTOMA_REGISTER - protocol not supported");
+			mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"ANTOMA_REGISTER - protocol not supported",length);
 			eptr->mode = KILL;
 			return;
 		}
@@ -552,7 +539,11 @@ void matomlserv_register(matomlserventry *eptr,const uint8_t *data,uint32_t leng
 			if (eptr->version>=VERSION2INT(4,23,5) && eptr->version<VERSION2INT(4,48,0)) {
 				eptr->version |= 1;
 			}
-			eptr->timeout = get16bit(&data);
+			if (ForceTimeout>0) {
+				data += 2;
+			} else {
+				eptr->timeout = get16bit(&data);
+			}
 			if (eptr->version < VERSION2INT(3,0,0)) {
 				mode = (eptr->version>=VERSION2INT(2,0,82))?1:0;
 			} else if (eptr->version < VERSION2INT(4,0,0)) {
@@ -688,11 +679,6 @@ void matomlserv_download_request(matomlserventry *eptr,const uint8_t *data,uint3
 	}
 	offset = get64bit(&data);
 	leng = get32bit(&data);
-	if (leng>ML_META_DL_BLOCK) {
-		mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"ANTOMA_DOWNLOAD_REQUEST - bad length");
-		eptr->mode = KILL;
-		return;
-	}
 	ptr = matomlserv_create_packet(eptr,MATOAN_DOWNLOAD_DATA,16+leng);
 	put64bit(&ptr,offset);
 	put32bit(&ptr,leng);
@@ -781,9 +767,9 @@ void matomlserv_gotpacket(matomlserventry *eptr,uint32_t type,const uint8_t *dat
 		case ANTOAN_GET_CONFIG:
 			matomlserv_get_config(eptr,data,length);
 			break;
-//		case ANTOAN_GET_CONFIG_FILE:
-//			matomlserv_get_config_file(eptr,data,length);
-//			break;
+		case ANTOAN_GET_CONFIG_FILE:
+			matomlserv_get_config_file(eptr,data,length);
+			break;
 		case ANTOMA_SYSLOG:
 			matomlserv_syslog(eptr,data,length);
 			break;
@@ -1301,7 +1287,6 @@ const char* matomlserv_getportstr(void) {
 	return ListenPort;
 }
 
-
 void matomlserv_reload_common(void) {
 	DefaultTimeout = cfg_getuint32("MATOML_TIMEOUT",10);
 	if (DefaultTimeout>65535) {
@@ -1317,6 +1302,7 @@ void matomlserv_reload_common(void) {
 	if (ForceTimeout>65535) {
 		ForceTimeout=65535;
 	}
+
 	BackMetaCopies = cfg_getuint32("BACK_META_KEEP_PREVIOUS",1);
 	if (BackMetaCopies>99) {
 		BackMetaCopies=99;
@@ -1430,7 +1416,8 @@ int matomlserv_init(void) {
 //	}
 	main_reload_register(matomlserv_reload);
 	main_destruct_register(matomlserv_term);
-	main_poll_register(matomlserv_desc,matomlserv_serve);
+	/* prio 5: metalogger replication highest among poll modules */
+	main_poll_register_prio(matomlserv_desc,matomlserv_serve,5);
 	main_keepalive_register(matomlserv_keep_alive);
 	main_time_register(10,0,matomlserv_broadcast_timeout);
 	return 0;

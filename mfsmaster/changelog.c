@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Jakub Kruszona-Zawadzki, Saglabs SA
+ * Copyright (C) 2025 Jakub Kruszona-Zawadzki, Saglabs SA
  * 
  * This file is part of MooseFS.
  * 
@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, see
- * <https://www.gnu.org/licenses/>.
+ * along with MooseFS; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA
+ * or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -375,7 +376,7 @@ void changelog_reload(void) {
 	}
 	ChangelogSecondsToRemember = cfg_getuint16("CHANGELOG_PRESERVE_SECONDS",5000);
 	if (ChangelogSecondsToRemember>100000) {
-		mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_WARNING,"Number of seconds of change logs to be preserved in master is too big (%"PRIu32") - decreasing to 100000 seconds",ChangelogSecondsToRemember);
+		mfs_log(MFSLOG_SYSLOG_STDERR,MFSLOG_WARNING,"Number of seconds of change logs to be preserved in master is too big (%"PRIu16") - decreasing to 100000 seconds",ChangelogSecondsToRemember);
 		ChangelogSecondsToRemember=100000;
 	}
 	changelog_preserve_mb = cfg_getuint16("CHANGELOG_PRESERVE_MB",500);
